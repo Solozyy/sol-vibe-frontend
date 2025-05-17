@@ -4,6 +4,7 @@ import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { motion } from "framer-motion";
 import { Wallet, Layers, Shield, Users, Zap, Menu, X } from "lucide-react";
+import Image from "next/image";
 
 interface NavBarProps {
   walletConnected: boolean;
@@ -74,22 +75,21 @@ export function NavBar({
         <div className="flex justify-between items-center">
           {/* Logo */}
           <motion.div
-            className="flex items-center"
+            className="flex items-center cursor-pointer"
             whileHover={{ scale: 1.05 }}
             transition={{ type: "spring", stiffness: 400, damping: 10 }}
+            onClick={() => scrollToSection("hero")}
           >
-            <div className="relative">
-              <div className="absolute -inset-1 bg-gradient-to-r from-purple-600 to-indigo-600 rounded-lg blur-sm opacity-75"></div>
-              <div className="relative bg-black px-4 py-2 rounded-lg">
-                <span className="text-2xl font-bold bg-gradient-to-r from-purple-400 to-indigo-400 bg-clip-text text-transparent">
-                  SolVibe
-                </span>
-                <span className="absolute -top-1 -right-1 flex h-3 w-3">
-                  <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-purple-400 opacity-75"></span>
-                  <span className="relative inline-flex rounded-full h-3 w-3 bg-purple-500"></span>
-                </span>
-              </div>
-            </div>
+            <Image
+              src="/solvibe-logo.svg"
+              alt="SolVibe"
+              width={100}
+              height={100}
+              className="w-10 h-10"
+            />
+            <span className="text-2xl font-bold bg-gradient-to-r from-[#9C43FF] to-[#0FFF9A] bg-clip-text text-transparent">
+              SolVibe
+            </span>
           </motion.div>
 
           {/* Desktop Navigation */}
@@ -131,19 +131,19 @@ export function NavBar({
           <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
             <Button
               onClick={connectWallet}
-              className="relative overflow-hidden group"
+              className="relative overflow-hidden group bg-gradient-to-r from-[#9C43FF] to-[#0FFF9A] cursor-pointer"
               size="lg"
             >
               {/* Animated background */}
-              <span className="absolute inset-0 w-full h-full bg-gradient-to-r from-purple-600 to-indigo-600"></span>
+              <span className="absolute inset-0 w-full h-full bg-gradient-to-r from-[#9C43FF] to-[#0FFF9A] group-hover:bg-gradient-to-r group-hover:from-[#0FFF9A] group-hover:to-[#9C43FF] transition-all duration-500 ease-in-out"></span>
 
               {/* Animated glow effect */}
-              <span className="absolute inset-0 w-full h-full bg-gradient-to-r from-purple-600/50 to-indigo-600/50 blur-md group-hover:opacity-75 opacity-0 transition-opacity duration-300"></span>
+              <span className="absolute inset-0 w-full h-full bg-gradient-to-r from-[#9C43FF]/50 to-[#0FFF9A]/50 group-hover:from-[#0FFF9A]/50 group-hover:to-[#9C43FF]/50 blur-md group-hover:opacity-75 opacity-0 transition-all duration-500 ease-in-out"></span>
 
               {/* Button content */}
               <span className="relative flex items-center gap-2 z-10">
                 <span className="relative">
-                  <Wallet size={18} className="text-white" />
+                  <Wallet size={18} className="text-black" />
                   <span
                     className={`absolute -top-1 -right-1 flex h-2 w-2 transition-opacity duration-300 ${
                       walletConnected ? "opacity-100" : "opacity-0"
@@ -153,7 +153,7 @@ export function NavBar({
                     <span className="relative inline-flex rounded-full h-2 w-2 bg-green-500"></span>
                   </span>
                 </span>
-                <span className="font-medium">
+                <span className="font-medium text-black">
                   {walletConnected ? "Connected" : "Connect Wallet"}
                 </span>
 

@@ -115,22 +115,21 @@ export function ParticleBackground() {
         if (!ctx) return;
         ctx.beginPath();
         ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
-        ctx.fillStyle = "#603fff";
+        ctx.fillStyle = "#9C43FF";
         ctx.fill();
       }
     }
 
     // Create particles in a globe-like distribution
-    const particleCount = 500; // More particles for better density
+    const particleCount = 500;
     const particles: Particle[] = [];
     const centerX = window.innerWidth / 2;
     const centerY = window.innerHeight / 2;
-    const radius = Math.min(window.innerWidth, window.innerHeight) * 0.4; // Globe radius
-
+    const radius = Math.min(window.innerWidth, window.innerHeight) * 0.4;
     for (let i = 0; i < particleCount; i++) {
       // Create particles in a spherical distribution
-      const angle1 = Math.random() * Math.PI * 2; // Horizontal angle
-      const angle2 = Math.random() * Math.PI * 2; // Vertical angle
+      const angle1 = Math.random() * Math.PI * 2;
+      const angle2 = Math.random() * Math.PI * 2;
 
       const x = centerX + radius * Math.cos(angle1) * Math.sin(angle2);
       const y = centerY + radius * Math.sin(angle1) * Math.sin(angle2);

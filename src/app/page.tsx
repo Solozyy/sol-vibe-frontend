@@ -80,7 +80,7 @@ export default function HomePage() {
                 className="max-w-xl"
               >
                 <h1 className="text-5xl md:text-6xl font-bold text-black mb-4">
-                  <span className="bg-gradient-to-r from-purple-600 to-indigo-600 bg-clip-text text-transparent">
+                  <span className="bg-gradient-to-r from-[#9C43FF] to-[#0FFF9A] bg-clip-text text-transparent">
                     SolVibe
                   </span>
                 </h1>
@@ -94,12 +94,12 @@ export default function HomePage() {
                   to create a transparent, user-owned ecosystem.
                 </p>
                 <div className="flex flex-wrap gap-4">
-                  <Button className="bg-black text-white hover:bg-black/90 px-8 py-6">
+                  <Button className="bg-gradient-to-r from-[#9C43FF] to-[#0FFF9A] text-black hover:scale-105 transition-all duration-300 px-8 py-6">
                     Get Started
                   </Button>
                   <Button
                     variant="outline"
-                    className="text-black border-black hover:bg-black/10 px-8 py-6"
+                    className="text-black border-[#9C43FF] hover:scale-105 transition-all duration-300 px-8 py-6"
                   >
                     Learn More
                   </Button>
@@ -211,7 +211,7 @@ export default function HomePage() {
               initial={{ opacity: 0, x: -30 }}
               animate={solanaInView ? { opacity: 1, x: 0 } : {}}
               transition={{ duration: 0.8, delay: 0.2 }}
-              className="bg-gradient-to-br from-purple-600 to-indigo-600 p-1 rounded-2xl"
+              className="bg-gradient-to-br from-[#9C43FF] to-[#0FFF9A] p-1 rounded-2xl"
             >
               <div className="bg-white/95 backdrop-blur-sm p-8 rounded-2xl h-full">
                 <div className="grid grid-cols-1 gap-6">
@@ -277,7 +277,7 @@ export default function HomePage() {
                   initial={{ width: 0 }}
                   animate={solanaInView ? { width: "95%" } : {}}
                   transition={{ duration: 1.5, delay: 0.6 }}
-                  className="absolute top-0 left-0 h-full bg-gradient-to-r from-purple-600 to-indigo-600 rounded-full"
+                  className="absolute top-0 left-0 h-full bg-gradient-to-r from-[#9C43FF] to-[#0FFF9A] rounded-full"
                 />
                 <div className="absolute inset-0 flex items-center justify-center text-white font-medium">
                   95% Lower Fees Than Ethereum
@@ -394,7 +394,7 @@ export default function HomePage() {
                   key={index}
                   className="flex flex-col items-center max-w-xs"
                 >
-                  <div className="w-12 h-12 rounded-full bg-purple-600 text-white flex items-center justify-center font-bold mb-4">
+                  <div className="w-12 h-12 rounded-full bg-gradient-to-r from-[#9C43FF] to-[#0FFF9A] text-white flex items-center justify-center font-bold mb-4">
                     {step.step}
                   </div>
                   <h4 className="text-lg font-semibold mb-2">{step.title}</h4>

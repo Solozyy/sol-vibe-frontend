@@ -9,6 +9,9 @@ export const metadata: Metadata = {
   title: "SolVibe - Decentralized Social Media on Solana",
   description:
     "Empowering creators with decentralized ownership, privacy, and fair rewards.",
+  icons: {
+    icon: "/solvibe-logo.svg",
+  },
 };
 
 export default function RootLayout({
