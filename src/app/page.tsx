@@ -178,7 +178,7 @@ export default function HomePage() {
                 initial={{ opacity: 0, y: 30 }}
                 animate={problemsInView ? { opacity: 1, y: 0 } : {}}
                 transition={{ duration: 0.6, delay: 0.1 * index }}
-                className="bg-white/90 backdrop-blur-sm p-8 rounded-xl shadow-sm hover:shadow-md transition-shadow"
+                className="bg-white/15 backdrop-blur-md p-8 rounded-xl shadow-lg hover:shadow-xl transition-shadow border border-white/30 relative overflow-hidden"
               >
                 <div className="mb-4">{problem.icon}</div>
                 <h3 className="text-xl font-semibold mb-2">{problem.title}</h3>
@@ -211,9 +211,9 @@ export default function HomePage() {
               initial={{ opacity: 0, x: -30 }}
               animate={solanaInView ? { opacity: 1, x: 0 } : {}}
               transition={{ duration: 0.8, delay: 0.2 }}
-              className="bg-gradient-to-br from-[#9C43FF] to-[#0FFF9A] p-1 rounded-2xl"
+              className="bg-gradient-to-br from-[#9C43FF]/20 to-[#0FFF9A]/20 p-[1px] rounded-2xl shadow-lg backdrop-filter"
             >
-              <div className="bg-white/95 backdrop-blur-sm p-8 rounded-2xl h-full">
+              <div className="bg-white/15 backdrop-blur-md p-8 rounded-2xl h-full border border-white/20 shadow-inner">
                 <div className="grid grid-cols-1 gap-6">
                   {[
                     {
@@ -242,12 +242,14 @@ export default function HomePage() {
                     },
                   ].map((feature, index) => (
                     <div key={index} className="flex items-start">
-                      <div className="mr-4">{feature.icon}</div>
+                      <div className="mr-4 bg-white/20 p-2 rounded-lg backdrop-blur-sm">
+                        {feature.icon}
+                      </div>
                       <div>
                         <h3 className="text-lg font-semibold mb-1">
                           {feature.title}
                         </h3>
-                        <p className="text-gray-600">{feature.description}</p>
+                        <p className="text-gray-700">{feature.description}</p>
                       </div>
                     </div>
                   ))}
@@ -259,27 +261,27 @@ export default function HomePage() {
               initial={{ opacity: 0, x: 30 }}
               animate={solanaInView ? { opacity: 1, x: 0 } : {}}
               transition={{ duration: 0.8, delay: 0.4 }}
-              className="bg-white/80 backdrop-blur-sm p-8 rounded-xl"
+              className="bg-white/20 backdrop-blur-md p-8 rounded-xl shadow-lg border border-white/30"
             >
               <h3 className="text-3xl font-bold mb-6">Solana Powers SolVibe</h3>
-              <p className="text-lg text-gray-600 mb-6">
+              <p className="text-lg text-gray-700 mb-6">
                 SolVibe leverages Solana's high-performance blockchain to create
                 a truly decentralized social media experience that prioritizes
                 creator ownership and fair rewards.
               </p>
-              <p className="text-lg text-gray-600 mb-6">
+              <p className="text-lg text-gray-700 mb-6">
                 With Solana's infrastructure, we can offer seamless
                 interactions, affordable NFT minting, and a responsive platform
                 that scales with our community.
               </p>
-              <div className="relative h-12 w-full max-w-md bg-gray-200 rounded-full overflow-hidden">
+              <div className="relative h-12 w-full max-w-md bg-gray-200/50 backdrop-blur-sm rounded-full overflow-hidden border border-white/30">
                 <motion.div
                   initial={{ width: 0 }}
                   animate={solanaInView ? { width: "95%" } : {}}
                   transition={{ duration: 1.5, delay: 0.6 }}
-                  className="absolute top-0 left-0 h-full bg-gradient-to-r from-[#9C43FF] to-[#0FFF9A] rounded-full"
+                  className="absolute top-0 left-0 h-full bg-gradient-to-r from-[#9C43FF]/80 to-[#0FFF9A]/80 rounded-full"
                 />
-                <div className="absolute inset-0 flex items-center justify-center text-white font-medium">
+                <div className="absolute inset-0 flex items-center justify-center text-white font-medium drop-shadow-md">
                   95% Lower Fees Than Ethereum
                 </div>
               </div>
@@ -349,10 +351,11 @@ export default function HomePage() {
                 initial={{ opacity: 0, y: 30 }}
                 animate={featuresInView ? { opacity: 1, y: 0 } : {}}
                 transition={{ duration: 0.6, delay: feature.delay }}
-                className="bg-white/90 backdrop-blur-sm p-8 rounded-xl shadow-sm hover:shadow-md transition-shadow border-t-4 border-purple-600"
+                className="bg-white/20 backdrop-blur-md p-8 rounded-xl shadow-lg hover:shadow-xl transition-shadow border border-white/30 relative overflow-hidden"
               >
+                <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-[#9C43FF]/60 to-[#0FFF9A]/60"></div>
                 <h3 className="text-xl font-semibold mb-3">{feature.title}</h3>
-                <p className="text-gray-600">{feature.description}</p>
+                <p className="text-gray-700">{feature.description}</p>
               </motion.div>
             ))}
           </div>
@@ -394,15 +397,15 @@ export default function HomePage() {
                   key={index}
                   className="flex flex-col items-center max-w-xs"
                 >
-                  <div className="w-12 h-12 rounded-full bg-gradient-to-r from-[#9C43FF] to-[#0FFF9A] text-white flex items-center justify-center font-bold mb-4">
+                  <div className="w-12 h-12 rounded-full bg-gradient-to-r from-[#9C43FF]/80 to-[#0FFF9A]/80 backdrop-blur-md text-white flex items-center justify-center font-bold mb-4 shadow-lg border border-white/30">
                     {step.step}
                   </div>
                   <h4 className="text-lg font-semibold mb-2">{step.title}</h4>
-                  <p className="text-gray-600 text-center">
+                  <p className="text-gray-700 text-center">
                     {step.description}
                   </p>
                   {index < 3 && (
-                    <div className="hidden md:block h-0.5 w-12 bg-purple-600 absolute translate-x-[150px] mt-6"></div>
+                    <div className="hidden md:block h-0.5 w-12 bg-gradient-to-r from-[#9C43FF]/60 to-[#0FFF9A]/60 absolute translate-x-[150px] mt-6"></div>
                   )}
                 </div>
               ))}
@@ -466,12 +469,15 @@ export default function HomePage() {
                 initial={{ opacity: 0, y: 30 }}
                 animate={audienceInView ? { opacity: 1, y: 0 } : {}}
                 transition={{ duration: 0.6, delay: audience.delay }}
-                className="bg-gradient-to-br from-purple-50/90 to-indigo-50/90 backdrop-blur-sm p-8 rounded-xl hover:shadow-md transition-shadow"
+                className="bg-white/20 backdrop-blur-md p-8 rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 border border-white/30 relative overflow-hidden group"
               >
-                <h3 className="text-xl font-semibold mb-3 text-purple-700">
+                <div className="absolute -top-20 -right-20 w-40 h-40 rounded-full bg-gradient-to-br from-[#9C43FF]/20 to-[#0FFF9A]/20 blur-xl group-hover:scale-125 transition-transform duration-500"></div>
+                <h3 className="text-xl font-semibold mb-3 bg-gradient-to-r from-purple-600 to-indigo-600 bg-clip-text text-transparent relative z-10">
                   {audience.title}
                 </h3>
-                <p className="text-gray-700">{audience.description}</p>
+                <p className="text-gray-700 relative z-10">
+                  {audience.description}
+                </p>
               </motion.div>
             ))}
           </div>
@@ -484,7 +490,7 @@ export default function HomePage() {
         <div className="container mx-auto px-6 relative z-10">
           <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
             <div>
-              <h3 className="text-2xl font-bold mb-4 bg-gradient-to-r from-purple-400 to-indigo-400 bg-clip-text text-transparent">
+              <h3 className="text-2xl font-bold mb-4 bg-gradient-to-r from-[#9C43FF] to-[#0FFF9A] bg-clip-text text-transparent">
                 SolVibe
               </h3>
               <p className="text-gray-400">
@@ -608,7 +614,7 @@ export default function HomePage() {
               </ul>
             </div>
           </div>
-          <div className="border-t border-gray-800 mt-12 pt-8 text-center text-gray-400">
+          <div className="border-t border-gray-800 mt-12 pt-8 text-center text-gray-600">
             <p>© {new Date().getFullYear()} SolVibe. All rights reserved.</p>
           </div>
         </div>
