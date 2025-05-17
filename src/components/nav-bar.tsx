@@ -1,25 +1,47 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { Button } from "@/components/ui/button";
 import { motion } from "framer-motion";
-import { Wallet, Layers, Shield, Users, Zap, Menu, X } from "lucide-react";
+import {
+  Wallet,
+  Layers,
+  Shield,
+  Users,
+  Zap,
+  Menu,
+  X,
+  Copy,
+  LogOut,
+  ChevronDown,
+} from "lucide-react";
 import Image from "next/image";
+import { useRouter } from "next/navigation";
 
 interface NavBarProps {
   walletConnected: boolean;
   connectWallet: () => void;
+  disconnectWallet?: () => void;
   scrollToSection: (id: string) => void;
+  walletAddress?: string | null;
+  isConnecting?: boolean;
 }
 
 export function NavBar({
   walletConnected,
   connectWallet,
+  disconnectWallet,
   scrollToSection,
+  walletAddress = null,
+  isConnecting = false,
 }: NavBarProps) {
+  const router = useRouter();
+  const dropdownRef = useRef<HTMLDivElement>(null);
   const [scrolled, setScrolled] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [activeHover, setActiveHover] = useState<string | null>(null);
+  const [walletDropdownOpen, setWalletDropdownOpen] = useState(false);
+  const [copySuccess, setCopySuccess] = useState(false);
   const [particles, setParticles] = useState<
     Array<{
       left: string;
@@ -53,12 +75,164 @@ export function NavBar({
     };
   }, []);
 
+  // Reset copy success message
+  useEffect(() => {
+    if (copySuccess) {
+      const timer = setTimeout(() => setCopySuccess(false), 2000);
+      return () => clearTimeout(timer);
+    }
+  }, [copySuccess]);
+
+  // Close dropdown when clicking outside
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (
+        dropdownRef.current &&
+        !dropdownRef.current.contains(event.target as Node)
+      ) {
+        setWalletDropdownOpen(false);
+      }
+    };
+
+    if (walletDropdownOpen) {
+      document.addEventListener("mousedown", handleClickOutside);
+    }
+
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
+  }, [walletDropdownOpen]);
+
   const navItems = [
     { id: "problems", label: "Problems", icon: <Shield size={16} /> },
     { id: "why-solana", label: "Why Solana", icon: <Zap size={16} /> },
     { id: "features", label: "Features", icon: <Layers size={16} /> },
     { id: "audience", label: "Audience", icon: <Users size={16} /> },
   ];
+
+  // Function to copy wallet address to clipboard
+  const copyWalletAddress = () => {
+    if (walletAddress) {
+      navigator.clipboard.writeText(walletAddress);
+      setCopySuccess(true);
+    }
+  };
+
+  // Function to handle disconnect
+  const handleDisconnect = () => {
+    if (disconnectWallet) {
+      disconnectWallet();
+      setWalletDropdownOpen(false);
+      router.push("/");
+    }
+  };
+
+  // Function to render wallet button or dropdown
+  const renderWalletButton = () => {
+    if (!walletConnected) {
+      // Not connected - show connect button
+      return (
+        <Button
+          onClick={connectWallet}
+          className="relative overflow-hidden group bg-gradient-to-r from-[#9C43FF] to-[#0FFF9A] cursor-pointer"
+          size="lg"
+          disabled={isConnecting}
+        >
+          {/* Animated background */}
+          <span className="absolute inset-0 w-full h-full bg-gradient-to-r from-[#9C43FF] to-[#0FFF9A] group-hover:bg-gradient-to-r group-hover:from-[#0FFF9A] group-hover:to-[#9C43FF] transition-all duration-500 ease-in-out"></span>
+
+          {/* Animated glow effect */}
+          <span className="absolute inset-0 w-full h-full bg-gradient-to-r from-[#9C43FF]/50 to-[#0FFF9A]/50 blur-md group-hover:opacity-75 opacity-0 transition-all duration-500 ease-in-out"></span>
+
+          {/* Button content */}
+          <span className="relative flex items-center gap-2 z-10">
+            <span className="relative">
+              <Wallet size={18} className="text-black" />
+            </span>
+            <span className="font-medium text-black">
+              {isConnecting ? "Connecting..." : "Connect Wallet"}
+            </span>
+
+            {/* Animated particles on hover */}
+            <span className="absolute top-0 left-0 w-full h-full">
+              {particles.map((particle, i) => (
+                <span
+                  key={i}
+                  className="absolute w-1 h-1 bg-white rounded-full opacity-0 group-hover:animate-particle"
+                  style={{
+                    left: particle.left,
+                    top: particle.top,
+                    animationDelay: particle.delay,
+                    animationDuration: particle.duration,
+                  }}
+                />
+              ))}
+            </span>
+          </span>
+        </Button>
+      );
+    } else {
+      // Connected - show wallet dropdown button
+      return (
+        <div className="relative" ref={dropdownRef}>
+          <Button
+            onClick={() => setWalletDropdownOpen(!walletDropdownOpen)}
+            className="relative overflow-hidden group bg-gradient-to-r from-[#9C43FF] to-[#0FFF9A] cursor-pointer"
+            size="lg"
+          >
+            {/* Animated background */}
+            <span className="absolute inset-0 w-full h-full bg-gradient-to-r from-[#9C43FF] to-[#0FFF9A] group-hover:bg-gradient-to-r group-hover:from-[#0FFF9A] group-hover:to-[#9C43FF] transition-all duration-500 ease-in-out"></span>
+
+            {/* Button content */}
+            <span className="relative flex items-center gap-2 z-10">
+              <span className="relative">
+                <Wallet size={18} className="text-black" />
+                <span className="absolute -top-1 -right-1 flex h-2 w-2">
+                  <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-400 opacity-75"></span>
+                  <span className="relative inline-flex rounded-full h-2 w-2 bg-green-500"></span>
+                </span>
+              </span>
+              <span className="font-medium text-black">
+                {walletAddress
+                  ? `${walletAddress.slice(0, 4)}...${walletAddress.slice(-4)}`
+                  : "Connected"}
+              </span>
+              <ChevronDown size={16} className="text-black" />
+            </span>
+          </Button>
+
+          {/* Dropdown menu */}
+          {walletDropdownOpen && (
+            <div className="absolute right-0 mt-2 w-48 bg-white/15 backdrop-blur-lg rounded-lg shadow-lg overflow-hidden border border-white/20 z-50">
+              <div className="p-2">
+                <div className="px-3 py-2 text-sm text-gray-700">
+                  <div className="font-medium">Wallet</div>
+                  <div className="text-xs opacity-70 truncate">
+                    {walletAddress}
+                  </div>
+                </div>
+                <div className="h-px bg-gray-200/20 my-1"></div>
+                <button
+                  onClick={copyWalletAddress}
+                  className="flex items-center gap-2 w-full px-3 py-2 text-sm hover:bg-white/10 rounded-md transition-colors"
+                >
+                  <Copy size={16} />
+                  <span>{copySuccess ? "Copied!" : "Copy Address"}</span>
+                </button>
+                <button
+                  onClick={handleDisconnect}
+                  className="flex items-center gap-2 w-full px-3 py-2 text-sm hover:bg-white/10 rounded-md transition-colors text-red-500"
+                >
+                  <LogOut size={16} />
+                  <span>Disconnect</span>
+                </button>
+              </div>
+            </div>
+          )}
+        </div>
+      );
+    }
+  };
 
   return (
     <motion.nav
@@ -127,53 +301,9 @@ export function NavBar({
             ))}
           </div>
 
-          {/* Wallet Button */}
+          {/* Wallet Button or Dropdown */}
           <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
-            <Button
-              onClick={connectWallet}
-              className="relative overflow-hidden group bg-gradient-to-r from-[#9C43FF] to-[#0FFF9A] cursor-pointer"
-              size="lg"
-            >
-              {/* Animated background */}
-              <span className="absolute inset-0 w-full h-full bg-gradient-to-r from-[#9C43FF] to-[#0FFF9A] group-hover:bg-gradient-to-r group-hover:from-[#0FFF9A] group-hover:to-[#9C43FF] transition-all duration-500 ease-in-out"></span>
-
-              {/* Animated glow effect */}
-              <span className="absolute inset-0 w-full h-full bg-gradient-to-r from-[#9C43FF]/50 to-[#0FFF9A]/50 group-hover:from-[#0FFF9A]/50 group-hover:to-[#9C43FF]/50 blur-md group-hover:opacity-75 opacity-0 transition-all duration-500 ease-in-out"></span>
-
-              {/* Button content */}
-              <span className="relative flex items-center gap-2 z-10">
-                <span className="relative">
-                  <Wallet size={18} className="text-black" />
-                  <span
-                    className={`absolute -top-1 -right-1 flex h-2 w-2 transition-opacity duration-300 ${
-                      walletConnected ? "opacity-100" : "opacity-0"
-                    }`}
-                  >
-                    <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-400 opacity-75"></span>
-                    <span className="relative inline-flex rounded-full h-2 w-2 bg-green-500"></span>
-                  </span>
-                </span>
-                <span className="font-medium text-black">
-                  {walletConnected ? "Connected" : "Connect Wallet"}
-                </span>
-
-                {/* Animated particles on hover */}
-                <span className="absolute top-0 left-0 w-full h-full">
-                  {particles.map((particle, i) => (
-                    <span
-                      key={i}
-                      className="absolute w-1 h-1 bg-white rounded-full opacity-0 group-hover:animate-particle"
-                      style={{
-                        left: particle.left,
-                        top: particle.top,
-                        animationDelay: particle.delay,
-                        animationDuration: particle.duration,
-                      }}
-                    />
-                  ))}
-                </span>
-              </span>
-            </Button>
+            {renderWalletButton()}
           </motion.div>
 
           {/* Mobile menu button */}

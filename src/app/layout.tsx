@@ -2,6 +2,7 @@ import type React from "react";
 import "./globals.css";
 import type { Metadata } from "next";
 import { Inter } from "next/font/google";
+import { PhantomWalletProvider } from "@/providers/PhantomWalletProvider";
 
 const inter = Inter({ subsets: ["latin"] });
 
@@ -21,7 +22,9 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en" className="scroll-smooth light">
-      <body className={inter.className}>{children}</body>
+      <body className={inter.className}>
+        <PhantomWalletProvider>{children}</PhantomWalletProvider>
+      </body>
     </html>
   );
 }

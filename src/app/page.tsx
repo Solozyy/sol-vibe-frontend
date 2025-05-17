@@ -1,6 +1,5 @@
 "use client";
 
-import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import {
   ChevronDown,
@@ -16,9 +15,13 @@ import { motion } from "framer-motion";
 import { useInView } from "react-intersection-observer";
 import { ParticleBackground } from "@/components/particle-background";
 import { NavBar } from "@/components/nav-bar";
+import { usePhantomWalletContext } from "@/providers/PhantomWalletProvider";
+import { ProfileSetupModal } from "@/components/ProfileSetupModal";
+import { useEffect } from "react";
+import { useRouter } from "next/navigation";
 
 export default function HomePage() {
-  const [walletConnected, setWalletConnected] = useState(false);
+  const router = useRouter();
 
   // Intersection observer hooks for animations
   const [heroRef, heroInView] = useInView({
@@ -42,11 +45,26 @@ export default function HomePage() {
     threshold: 0.1,
   });
 
-  const connectWallet = () => {
-    // This would be replaced with actual Solana wallet connection logic
-    setWalletConnected(!walletConnected);
-    console.log("Connecting to Solana wallet...");
-  };
+  // Use Phantom wallet hook from context
+  const {
+    connected: walletConnected,
+    connect: connectWallet,
+    disconnect: disconnectWallet,
+    connecting,
+    walletExists,
+    address,
+    showProfileSetup,
+    closeProfileSetup,
+    completeProfileSetup,
+    profileCompleted,
+  } = usePhantomWalletContext();
+
+  // Redirect to home if already connected and profile is completed
+  useEffect(() => {
+    if (walletConnected && profileCompleted && !showProfileSetup) {
+      router.push("/home");
+    }
+  }, [walletConnected, profileCompleted, showProfileSetup, router]);
 
   const scrollToSection = (id: string) => {
     const element = document.getElementById(id);
@@ -64,8 +82,21 @@ export default function HomePage() {
       <NavBar
         walletConnected={walletConnected}
         connectWallet={connectWallet}
+        disconnectWallet={disconnectWallet}
         scrollToSection={scrollToSection}
+        walletAddress={address}
+        isConnecting={connecting}
       />
+
+      {/* Profile Setup Modal */}
+      {showProfileSetup && (
+        <ProfileSetupModal
+          isOpen={showProfileSetup}
+          onClose={closeProfileSetup}
+          walletAddress={address}
+          completeProfileSetup={completeProfileSetup}
+        />
+      )}
 
       {/* Hero Section */}
       <div className="relative w-full h-screen" id="hero">
