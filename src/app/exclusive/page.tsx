@@ -6,10 +6,8 @@ import { Button } from "@/components/ui/button";
 import { usePhantomWalletContext } from "@/providers/PhantomWalletProvider";
 import { NavBar } from "@/components/nav-bar";
 import ExploreContent from "@/components/explore/ExploreContent";
-// import Navbar from '@/components/nav-bar'; // Assuming Navbar is in components/layout
-// import Footer from '@/components/layout/Footer'; // Assuming Footer is in components/layout
 
-const ExplorePage = () => {
+const ExclusivePage = () => {
   const router = useRouter();
   const {
     connected: walletConnected,
@@ -66,4 +64,4 @@ const ExplorePage = () => {
   );
 };
 
-export default ExplorePage;
+export default ExclusivePage;

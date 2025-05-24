@@ -38,7 +38,9 @@ export function ProfileSetupModal({
   const [isLoading, setIsLoading] = useState(false);
   const [profileImage, setProfileImage] = useState<string | null>(null);
   const [messageToSign, setMessageToSign] = useState<string | null>(null);
-  const [generatedSignature, setGeneratedSignature] = useState<string | null>(null);
+  const [generatedSignature, setGeneratedSignature] = useState<string | null>(
+    null
+  );
   const [formData, setFormData] = useState({
     username: "",
     displayName: "",
@@ -103,11 +105,17 @@ export function ProfileSetupModal({
         // UI should now prompt to sign the message `registerResponse.messageToSign`
         console.log("Received message to sign:", registerResponse.message);
       } else {
-        throw new Error("Failed to get message to sign from registration process.");
+        throw new Error(
+          "Failed to get message to sign from registration process."
+        );
       }
     } catch (error) {
       console.error("Error during registration submission:", error);
-      alert(`Registration failed: ${error instanceof Error ? error.message : String(error)}`);
+      alert(
+        `Registration failed: ${
+          error instanceof Error ? error.message : String(error)
+        }`
+      );
       setStep(1); // Go back to form
     } finally {
       setIsLoading(false);
@@ -165,9 +173,9 @@ export function ProfileSetupModal({
         }
 
         // completeProfileSetup(); // Hàm này từ usePhantomWallet, có thể AuthProvider đã xử lý trạng thái tương tự
-                                // Nếu completeProfileSetup chỉ để đóng modal và cập nhật state local của usePhantomWallet,
-                                // thì vẫn có thể giữ lại hoặc thay bằng logic trực tiếp.
-                                // Hiện tại, chúng ta ưu tiên AuthContext quản lý trạng thái xác thực.
+        // Nếu completeProfileSetup chỉ để đóng modal và cập nhật state local của usePhantomWallet,
+        // thì vẫn có thể giữ lại hoặc thay bằng logic trực tiếp.
+        // Hiện tại, chúng ta ưu tiên AuthContext quản lý trạng thái xác thực.
         // Xem xét lại vai trò của completeProfileSetup từ props
         // Nếu ProfileSetupModal chỉ chịu trách nhiệm đăng ký và AuthContext.login cập nhật trạng thái toàn cục,
         // thì completeProfileSetup có thể chỉ gọi props.onClose() hoặc một hành động UI cụ thể.
@@ -175,14 +183,20 @@ export function ProfileSetupModal({
         // Gọi onClose được truyền từ props để đóng modal
         onClose(); // Giả sử onClose là hàm đóng modal được truyền từ parent
 
-        router.push("/home"); // Redirect to home or dashboard
+        router.push("/explore"); // Redirect to home or dashboard
       } else {
-        throw new Error("Phantom wallet not available or signMessage method missing.");
+        throw new Error(
+          "Phantom wallet not available or signMessage method missing."
+        );
       }
     } catch (error) {
       console.error("Error during signing or verification:", error);
-      alert(`Operation failed: ${error instanceof Error ? error.message : String(error)}`);
-      setStep(1); // Go back to form on critical error
+      alert(
+        `Operation failed: ${
+          error instanceof Error ? error.message : String(error)
+        }`
+      );
+      setStep(1);
     } finally {
       setIsLoading(false);
     }
@@ -305,8 +319,9 @@ export function ProfileSetupModal({
               Please Sign Message
             </h3>
             <p className="text-gray-600 mb-6 max-w-xs mx-auto">
-              Confirm your profile creation by signing the message requested by your wallet.
-              The message is: "<strong>{messageToSign || 'Loading message...'}</strong>"
+              Confirm your profile creation by signing the message requested by
+              your wallet. The message is: "
+              <strong>{messageToSign || "Loading message..."}</strong>"
             </p>
             <Button
               onClick={handleSignAndVerify}
@@ -372,7 +387,11 @@ export function ProfileSetupModal({
       case 2: // Signing
         return (
           <p className="text-sm text-center text-gray-500">
-            {isLoading ? "Processing registration..." : messageToSign ? "Ready to sign the message above." : "Requesting message..."}
+            {isLoading
+              ? "Processing registration..."
+              : messageToSign
+              ? "Ready to sign the message above."
+              : "Requesting message..."}
           </p>
         );
 

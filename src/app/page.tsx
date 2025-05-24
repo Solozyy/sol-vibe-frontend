@@ -62,7 +62,7 @@ export default function HomePage() {
   // Redirect to home if already connected and profile is completed
   useEffect(() => {
     if (isAuthenticated && user) {
-      router.push("/home");
+      router.push("/explore");
     }
   }, [isAuthenticated, user, router]);
 
@@ -94,7 +94,7 @@ export default function HomePage() {
           isOpen={isProfileModalOpen}
           onClose={closeProfileModal}
           walletAddress={walletAddress}
-          completeProfileSetup={() => { }}
+          completeProfileSetup={() => {}}
         />
       )}
 

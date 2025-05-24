@@ -103,12 +103,28 @@ export function NavBar({
     };
   }, [walletDropdownOpen]);
 
-  const navItems = [
-    { id: "problems", label: "Problems", icon: <Shield size={16} /> },
-    { id: "why-solana", label: "Why Solana", icon: <Zap size={16} /> },
-    { id: "features", label: "Features", icon: <Layers size={16} /> },
-    { id: "audience", label: "Audience", icon: <Users size={16} /> },
-  ];
+  // Define navigation items based on wallet connection status
+  const navItems = walletConnected
+    ? [
+        { id: "explore", label: "Explore", icon: <Layers size={16} /> },
+        { id: "exclusive", label: "Exclusive", icon: <Shield size={16} /> },
+        { id: "profile", label: "Profile", icon: <Users size={16} /> },
+      ]
+    : [
+        { id: "problems", label: "Problems", icon: <Shield size={16} /> },
+        { id: "why-solana", label: "Why Solana", icon: <Zap size={16} /> },
+        { id: "features", label: "Features", icon: <Layers size={16} /> },
+        { id: "audience", label: "Audience", icon: <Users size={16} /> },
+      ];
+
+  // Function to handle navigation
+  const handleNavigation = (id: string) => {
+    if (walletConnected) {
+      router.push(`/${id}`);
+    } else {
+      scrollToSection(id);
+    }
+  };
 
   // Function to copy wallet address to clipboard
   const copyWalletAddress = () => {
@@ -271,7 +287,7 @@ export function NavBar({
             {navItems.map((item) => (
               <motion.button
                 key={item.id}
-                onClick={() => scrollToSection(item.id)}
+                onClick={() => handleNavigation(item.id)}
                 onMouseEnter={() => setActiveHover(item.id)}
                 onMouseLeave={() => setActiveHover(null)}
                 whileHover={{ y: -4 }}
@@ -341,7 +357,7 @@ export function NavBar({
             <motion.button
               key={item.id}
               onClick={() => {
-                scrollToSection(item.id);
+                handleNavigation(item.id);
                 setMobileMenuOpen(false);
               }}
               whileTap={{ scale: 0.95 }}
