@@ -4,6 +4,8 @@ import type { Metadata } from "next";
 import { Inter } from "next/font/google";
 import { PhantomWalletProvider } from "@/providers/PhantomWalletProvider";
 import { AuthProvider } from "@/contexts/AuthContext";
+import { UserProvider } from "@/contexts/UserContext";
+import { WalletProvider } from "@/contexts/WalletContext";
 
 const inter = Inter({ subsets: ["latin"] });
 
@@ -24,8 +26,12 @@ export default function RootLayout({
   return (
     <html lang="en" className="scroll-smooth light">
       <body className={inter.className}>
-        <PhantomWalletProvider>
-          <AuthProvider>{children}</AuthProvider>
+        <PhantomWalletProvider> {/* PhantomWalletProvider wraps UserProvider */}
+        <WalletProvider>
+          <UserProvider> {/* UserProvider wraps AuthProvider */}
+            <AuthProvider>{children}</AuthProvider>
+          </UserProvider>
+        </WalletProvider>
         </PhantomWalletProvider>
       </body>
     </html>
