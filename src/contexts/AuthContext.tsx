@@ -5,6 +5,11 @@ import { usePhantomWalletContext } from "@/providers/PhantomWalletProvider";
 import type { WalletInfo } from "@/hooks/usePhantomWallet";
 import { PublicKey } from '@solana/web3.js';
 import bs58 from 'bs58';
+import {
+  authControllerRequestSignatureMessage,
+  authControllerCheckWallet,
+  // Thêm các hàm API khác nếu AuthContext cần gọi trực tiếp
+} from "@/services/apiService"; // Import các hàm API cần thiết
 
 const API_BASE_URL = 'http://localhost:3000';
 
@@ -52,6 +57,7 @@ interface AuthProviderProps {
 
 const TOKEN_STORAGE_KEY = 'solVibe_authToken';
 const USER_STORAGE_KEY = 'solVibe_authUser';
+const PROFILE_SETUP_KEY = "solVibe_profile_completed";
 
 export const AuthProvider = ({ children }: AuthProviderProps) => {
   const {
@@ -170,6 +176,7 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
     clearAuthState();
     localStorage.removeItem(TOKEN_STORAGE_KEY);
     localStorage.removeItem(USER_STORAGE_KEY);
+    localStorage.removeItem(PROFILE_SETUP_KEY);
   };
   
   const openProfileModal = () => setIsProfileModalOpen(true);
@@ -179,6 +186,60 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
         setIsLoading(false);
     }
   };
+
+  // Hàm mới để xử lý đăng nhập cho người dùng đã tồn tại
+  const initiateLoginForExistingUser = useCallback(async (walletAddress: string) => {
+    if (!phantomSignMessage) { // phantomSignMessage được lấy từ usePhantomWalletContext
+      handleApiError('Wallet does not support signMessage for login.');
+      return;
+    }
+    setIsLoading(true);
+    try {
+      console.log(`AuthContext: Initiating login for existing user ${walletAddress}`);
+      const sigResponse = await authControllerRequestSignatureMessage({ walletAddress });
+      if (sigResponse && sigResponse.message) {
+        // Gọi hàm performSignAndVerify đã có sẵn, nó sẽ handle việc ký và gọi /auth/verify
+        await performSignAndVerify(walletAddress, sigResponse.message);
+      } else {
+        throw new Error("Failed to get message to sign for login.");
+      }
+    } catch (err) {
+      handleApiError(`Login failed for ${walletAddress}.`, err);
+      // Có thể logout ở đây để đảm bảo trạng thái sạch sẽ
+      // logout(); // Xem xét cẩn thận nếu gọi logout ở đây
+    } finally {
+      // setIsLoading(false); // performSignAndVerify sẽ set isLoading
+    }
+  }, [phantomSignMessage, performSignAndVerify]); // Thêm performSignAndVerify vào dependencies
+
+  // useEffect để xử lý tự động đăng nhập hoặc mở profile setup khi ví kết nối
+  useEffect(() => {
+    const handleWalletConnection = async () => {
+      if (isWalletCurrentlyConnected && currentWalletAddress && !token && !isLoading) {
+        // Chỉ thực hiện nếu ví đã kết nối, có địa chỉ, chưa có token (chưa login) và không đang loading
+        setIsLoading(true);
+        console.log(`AuthContext: Wallet connected (${currentWalletAddress}). Checking user status.`);
+        try {
+          const checkResponse = await authControllerCheckWallet({ walletAddress: currentWalletAddress });
+          if (checkResponse.exists) {
+            console.log("AuthContext: User exists. Initiating login flow.");
+            // Người dùng tồn tại, bắt đầu luồng đăng nhập
+            await initiateLoginForExistingUser(currentWalletAddress);
+          } else {
+            console.log("AuthContext: User does not exist. Opening profile modal.");
+            // Người dùng không tồn tại, mở modal để đăng ký
+            openProfileModal();
+            setIsLoading(false); // Dừng loading vì chờ người dùng nhập form
+          }
+        } catch (error) {
+          handleApiError("AuthContext: Error checking wallet status or initiating login/signup.", error);
+          setIsLoading(false);
+        }
+      }
+    };
+
+    handleWalletConnection();
+  }, [isWalletCurrentlyConnected, currentWalletAddress, token, isLoading, initiateLoginForExistingUser, openProfileModal]);
 
   return (
     <AuthContext.Provider

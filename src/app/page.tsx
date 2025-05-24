@@ -15,7 +15,7 @@ import { motion } from "framer-motion";
 import { useInView } from "react-intersection-observer";
 import { ParticleBackground } from "@/components/particle-background";
 import { NavBar } from "@/components/nav-bar";
-import { usePhantomWalletContext } from "@/providers/PhantomWalletProvider";
+import { useAuth } from "@/contexts/AuthContext";
 import { ProfileSetupModal } from "@/components/ProfileSetupModal";
 import { useEffect } from "react";
 import { useRouter } from "next/navigation";
@@ -47,24 +47,24 @@ export default function HomePage() {
 
   // Use Phantom wallet hook from context
   const {
-    connected: walletConnected,
-    connect: connectWallet,
-    disconnect: disconnectWallet,
-    connecting,
-    walletExists,
-    address,
-    showProfileSetup,
-    closeProfileSetup,
-    completeProfileSetup,
-    profileCompleted,
-  } = usePhantomWalletContext();
+    isAuthenticated,
+    user,
+    logout: authLogout,
+    walletAddress,
+    isWalletConnected,
+    walletConnect,
+    isLoading: authIsLoading,
+    isProfileModalOpen,
+    openProfileModal,
+    closeProfileModal,
+  } = useAuth();
 
   // Redirect to home if already connected and profile is completed
   useEffect(() => {
-    if (walletConnected && profileCompleted && !showProfileSetup) {
+    if (isAuthenticated && user) {
       router.push("/home");
     }
-  }, [walletConnected, profileCompleted, showProfileSetup, router]);
+  }, [isAuthenticated, user, router]);
 
   const scrollToSection = (id: string) => {
     const element = document.getElementById(id);
@@ -80,21 +80,21 @@ export default function HomePage() {
 
       {/* Navigation Bar */}
       <NavBar
-        walletConnected={walletConnected}
-        connectWallet={connectWallet}
-        disconnectWallet={disconnectWallet}
+        walletConnected={isWalletConnected}
+        connectWallet={walletConnect}
+        disconnectWallet={authLogout}
         scrollToSection={scrollToSection}
-        walletAddress={address}
-        isConnecting={connecting}
+        walletAddress={walletAddress}
+        isConnecting={authIsLoading}
       />
 
       {/* Profile Setup Modal */}
-      {showProfileSetup && (
+      {isProfileModalOpen && (
         <ProfileSetupModal
-          isOpen={showProfileSetup}
-          onClose={closeProfileSetup}
-          walletAddress={address}
-          completeProfileSetup={completeProfileSetup}
+          isOpen={isProfileModalOpen}
+          onClose={closeProfileModal}
+          walletAddress={walletAddress}
+          completeProfileSetup={() => { }}
         />
       )}
 

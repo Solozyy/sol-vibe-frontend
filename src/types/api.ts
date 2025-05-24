@@ -37,7 +37,7 @@ export interface RegisterResponse {
 }
 
 export interface RequestSignatureResponse {
-  messageToSign: string;
+  message: string;
 }
 
 export interface VerifyResponse {

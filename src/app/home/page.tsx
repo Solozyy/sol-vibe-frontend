@@ -3,38 +3,28 @@
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
-import { usePhantomWalletContext } from "@/providers/PhantomWalletProvider";
+import { useAuth } from "@/contexts/AuthContext";
 import { NavBar } from "@/components/nav-bar";
 
 export default function HomePage() {
   const router = useRouter();
   const {
-    connected: walletConnected,
-    connect: connectWallet,
-    disconnect: disconnectWallet,
-    address,
-    connecting,
-    profileCompleted,
-  } = usePhantomWalletContext();
-
-  // Check if user is authenticated before redirecting
-  const [isCheckingAuth, setIsCheckingAuth] = useState(true);
-
-  // Wait a moment for wallet reconnection before redirecting
-  useEffect(() => {
-    const checkAuth = setTimeout(() => {
-      setIsCheckingAuth(false);
-    }, 1000); // Give time for auto-reconnect to complete
-
-    return () => clearTimeout(checkAuth);
-  }, []);
+    isAuthenticated,
+    isLoading: authIsLoading,
+    user,
+    token,
+    logout: authLogout,
+    walletAddress,
+    isWalletConnected,
+    walletConnect,
+  } = useAuth();
 
   // Redirect to main page if not connected and finished checking auth
   useEffect(() => {
-    if (!isCheckingAuth && !walletConnected) {
+    if (!authIsLoading && !isAuthenticated) {
       router.push("/");
     }
-  }, [walletConnected, router, isCheckingAuth]);
+  }, [isAuthenticated, authIsLoading, router]);
 
   const scrollToSection = (id: string) => {
     const element = document.getElementById(id);
@@ -47,12 +37,12 @@ export default function HomePage() {
     <div className="min-h-screen bg-gradient-to-b from-purple-50 to-white">
       {/* Navigation */}
       <NavBar
-        walletConnected={walletConnected}
-        connectWallet={connectWallet}
-        disconnectWallet={disconnectWallet}
+        walletConnected={isAuthenticated}
+        connectWallet={walletConnect}
+        disconnectWallet={authLogout}
         scrollToSection={scrollToSection}
-        walletAddress={address}
-        isConnecting={connecting}
+        walletAddress={walletAddress}
+        isConnecting={authIsLoading}
       />
 
       {/* Main content */}
@@ -153,7 +143,7 @@ export default function HomePage() {
           <div className="flex items-center justify-between">
             <div>
               <h3 className="text-xl font-semibold mb-1">Your Wallet</h3>
-              <p className="text-purple-600 break-all">{address}</p>
+              <p className="text-purple-600 break-all">{walletAddress}</p>
             </div>
             <div className="bg-green-100 px-3 py-1 rounded-full">
               <span className="text-green-700 text-sm font-medium">
