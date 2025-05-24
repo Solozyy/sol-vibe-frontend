@@ -1,24 +1,33 @@
-"use client"
+"use client";
 
-import { useState, useEffect } from "react"
-import { Button } from "@/components/ui/button"
-import { Card, CardContent } from "@/components/ui/card"
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
-import { Badge } from "@/components/ui/badge"
-import { ArtworkCard } from "@/components/artwork/ArtworkCard"
-import { ArtworkModal } from "@/components/artwork/ArtworkModal"
-import { TipModal } from "@/components/tipping/TipModal"
-import { SubscriptionModal } from "@/components/subscription/SubscriptionModal"
-import { EditProfileModal } from "@/components/profile/EditProfileModal"
-import { useUser } from "@/contexts/UserContext"
-import { useWallet } from "@/contexts/WalletContext"
-import { useToast } from "@/hooks/use-toast"
-import { DollarSign, Users, Palette, Star, Settings, Copy, Calendar, Coins } from "lucide-react"
-import type { Artwork, User } from "@/types"
+import { useState, useEffect } from "react";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent } from "@/components/ui/card";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Badge } from "@/components/ui/badge";
+import { ArtworkCard } from "@/components/artwork/ArtworkCard";
+import { ArtworkModal } from "@/components/artwork/ArtworkModal";
+import { TipModal } from "@/components/tipping/TipModal";
+import { SubscriptionModal } from "@/components/subscription/SubscriptionModal";
+import { EditProfileModal } from "@/components/profile/EditProfileModal";
+import { useUser } from "@/contexts/UserContext";
+import { useWallet } from "@/contexts/WalletContext";
+import { useToast } from "@/hooks/use-toast";
+import {
+  DollarSign,
+  Users,
+  Palette,
+  Star,
+  Settings,
+  Copy,
+  Calendar,
+  Coins,
+} from "lucide-react";
+import type { Artwork, User } from "@/types";
 
 interface ProfileContentProps {
-  walletAddress: string
+  walletAddress: string;
 }
 
 // Mock profile data
@@ -33,7 +42,7 @@ const mockProfileData: User = {
   totalTipsReceived: 125.8,
   totalArtworks: 24,
   joinedAt: "2024-01-01T00:00:00Z",
-}
+};
 
 const mockArtworks: Artwork[] = [
   {
@@ -41,7 +50,7 @@ const mockArtworks: Artwork[] = [
     title: "Digital Dreams",
     description: "A vibrant exploration of digital consciousness",
     imageUrl: "/placeholder.svg?height=400&width=400&query=digital art",
-    artistWallet: "9WzDXwBbmkg8ZTbNMqUxvQRAyrZzDsGYdLVL9zYtAWWM",
+    artistWallet: "2Qap48j9Wb4cnDZ7TUFNGxoaMuE6LPi14QTS8MHe5moW",
     artistUsername: "CryptoArtist",
     artistAvatar: "/placeholder.svg?height=50&width=50&query=artist",
     isExclusive: false,
@@ -56,7 +65,7 @@ const mockArtworks: Artwork[] = [
     title: "Exclusive Masterpiece",
     description: "Premium artwork for subscribers only",
     imageUrl: "/placeholder.svg?height=400&width=400&query=exclusive art",
-    artistWallet: "9WzDXwBbmkg8ZTbNMqUxvQRAyrZzDsGYdLVL9zYtAWWM",
+    artistWallet: "2Qap48j9Wb4cnDZ7TUFNGxoaMuE6LPi14QTS8MHe5moW",
     artistUsername: "CryptoArtist",
     artistAvatar: "/placeholder.svg?height=50&width=50&query=artist",
     isExclusive: true,
@@ -66,73 +75,78 @@ const mockArtworks: Artwork[] = [
     netVotes: 27,
     createdAt: "2024-01-10T14:20:00Z",
   },
-]
+];
 
 export default function ProfileContent({ walletAddress }: ProfileContentProps) {
-  const [profileData, setProfileData] = useState<User | null>(null)
-  const [artworks, setArtworks] = useState<Artwork[]>([])
-  const [exclusiveArtworks, setExclusiveArtworks] = useState<Artwork[]>([])
-  const [selectedArtwork, setSelectedArtwork] = useState<Artwork | null>(null)
-  const [showTipModal, setShowTipModal] = useState(false)
-  const [showSubscriptionModal, setShowSubscriptionModal] = useState(false)
-  const [showEditModal, setShowEditModal] = useState(false)
-  const [isSubscribed, setIsSubscribed] = useState(false)
-  const [loading, setLoading] = useState(true)
+  const [profileData, setProfileData] = useState<User | null>(null);
+  const [artworks, setArtworks] = useState<Artwork[]>([]);
+  const [exclusiveArtworks, setExclusiveArtworks] = useState<Artwork[]>([]);
+  const [selectedArtwork, setSelectedArtwork] = useState<Artwork | null>(null);
+  const [showTipModal, setShowTipModal] = useState(false);
+  const [showSubscriptionModal, setShowSubscriptionModal] = useState(false);
+  const [showEditModal, setShowEditModal] = useState(false);
+  const [isSubscribed, setIsSubscribed] = useState(false);
+  const [loading, setLoading] = useState(true);
 
-  const { user: currentUser } = useUser()
-  const { publicKey } = useWallet()
-  const { toast } = useToast()
+  const { user: currentUser } = useUser();
+  const { publicKey } = useWallet();
+  const { toast } = useToast();
 
-  const isOwnProfile = publicKey === walletAddress
+  const isOwnProfile = publicKey === walletAddress;
 
   useEffect(() => {
-    fetchProfileData()
-  }, [walletAddress])
+    fetchProfileData();
+  }, [walletAddress]);
 
   const fetchProfileData = async () => {
-    setLoading(true)
+    setLoading(true);
     try {
       // TODO: Replace with actual API calls
       // const profileResponse = await apiClient.getUserProfile(walletAddress)
       // const artworksResponse = await apiClient.getArtworks({ artistWallet: walletAddress })
 
-      setProfileData(mockProfileData)
-      setArtworks(mockArtworks.filter((a) => !a.isExclusive))
-      setExclusiveArtworks(mockArtworks.filter((a) => a.isExclusive))
+      setProfileData(mockProfileData);
+      setArtworks(mockArtworks.filter((a) => !a.isExclusive));
+      setExclusiveArtworks(mockArtworks.filter((a) => a.isExclusive));
 
       // Check subscription status
-      setIsSubscribed(currentUser?.subscriptions?.includes(walletAddress) || false)
+      setIsSubscribed(
+        currentUser?.subscriptions?.includes(walletAddress) || false
+      );
     } catch (error) {
-      console.error("Failed to fetch profile data:", error)
+      console.error("Failed to fetch profile data:", error);
       toast({
         title: "Error",
         description: "Failed to load profile data.",
         variant: "destructive",
-      })
+      });
     } finally {
-      setLoading(false)
+      setLoading(false);
     }
-  }
+  };
 
-  const handleVote = async (artworkId: string, voteType: "upvote" | "downvote") => {
+  const handleVote = async (
+    artworkId: string,
+    voteType: "upvote" | "downvote"
+  ) => {
     // Implementation from ArtworkCard
-    console.log("Vote:", artworkId, voteType)
-  }
+    console.log("Vote:", artworkId, voteType);
+  };
 
   const copyWalletAddress = () => {
-    navigator.clipboard.writeText(walletAddress)
+    navigator.clipboard.writeText(walletAddress);
     toast({
       title: "Copied!",
       description: "Wallet address copied to clipboard.",
-    })
-  }
+    });
+  };
 
   const formatDate = (dateString: string) => {
     return new Date(dateString).toLocaleDateString("en-US", {
       year: "numeric",
       month: "long",
-    })
-  }
+    });
+  };
 
   if (loading) {
     return (
@@ -143,16 +157,18 @@ export default function ProfileContent({ walletAddress }: ProfileContentProps) {
           <div className="h-4 bg-muted rounded w-1/2" />
         </div>
       </div>
-    )
+    );
   }
 
   if (!profileData) {
     return (
       <div className="text-center py-12">
         <h2 className="text-2xl font-bold mb-2">Profile Not Found</h2>
-        <p className="text-muted-foreground">This user profile does not exist.</p>
+        <p className="text-muted-foreground">
+          This user profile does not exist.
+        </p>
       </div>
-    )
+    );
   }
 
   return (
@@ -165,12 +181,19 @@ export default function ProfileContent({ walletAddress }: ProfileContentProps) {
               {/* Avatar and basic info */}
               <div className="flex flex-col items-center md:items-start">
                 <Avatar className="h-24 w-24 mb-4">
-                  <AvatarImage src={profileData.avatar || "/placeholder.svg"} alt={profileData.username} />
-                  <AvatarFallback className="text-2xl">{profileData.username.charAt(0).toUpperCase()}</AvatarFallback>
+                  <AvatarImage
+                    src={profileData.avatar || "/placeholder.svg"}
+                    alt={profileData.username}
+                  />
+                  <AvatarFallback className="text-2xl">
+                    {profileData.username.charAt(0).toUpperCase()}
+                  </AvatarFallback>
                 </Avatar>
 
                 <div className="text-center md:text-left">
-                  <h1 className="text-2xl font-bold mb-1">{profileData.username}</h1>
+                  <h1 className="text-2xl font-bold mb-1">
+                    {profileData.username}
+                  </h1>
                   <div className="flex items-center gap-2 mb-2">
                     {profileData.isArtist && (
                       <Badge
@@ -208,12 +231,20 @@ export default function ProfileContent({ walletAddress }: ProfileContentProps) {
                   {profileData.isArtist && (
                     <>
                       <div className="text-center p-3 bg-muted/50 rounded-lg">
-                        <p className="text-2xl font-bold">{profileData.totalArtworks}</p>
-                        <p className="text-sm text-muted-foreground">Artworks</p>
+                        <p className="text-2xl font-bold">
+                          {profileData.totalArtworks}
+                        </p>
+                        <p className="text-sm text-muted-foreground">
+                          Artworks
+                        </p>
                       </div>
                       <div className="text-center p-3 bg-muted/50 rounded-lg">
-                        <p className="text-2xl font-bold">{profileData.totalTipsReceived?.toFixed(1)}</p>
-                        <p className="text-sm text-muted-foreground">SOL Received</p>
+                        <p className="text-2xl font-bold">
+                          {profileData.totalTipsReceived?.toFixed(1)}
+                        </p>
+                        <p className="text-sm text-muted-foreground">
+                          SOL Received
+                        </p>
                       </div>
                     </>
                   )}
@@ -222,7 +253,9 @@ export default function ProfileContent({ walletAddress }: ProfileContentProps) {
                     <p className="text-sm text-muted-foreground">Credits</p>
                   </div>
                   <div className="text-center p-3 bg-muted/50 rounded-lg">
-                    <p className="text-2xl font-bold">{profileData.solvBalance}</p>
+                    <p className="text-2xl font-bold">
+                      {profileData.solvBalance}
+                    </p>
                     <p className="text-sm text-muted-foreground">SOLV</p>
                   </div>
                 </div>
@@ -230,13 +263,19 @@ export default function ProfileContent({ walletAddress }: ProfileContentProps) {
                 {/* Action buttons */}
                 <div className="flex flex-wrap gap-2">
                   {isOwnProfile ? (
-                    <Button onClick={() => setShowEditModal(true)} variant="outline">
+                    <Button
+                      onClick={() => setShowEditModal(true)}
+                      variant="outline"
+                    >
                       <Settings className="h-4 w-4 mr-2" />
                       Edit Profile
                     </Button>
                   ) : (
                     <>
-                      <Button onClick={() => setShowTipModal(true)} className="gradient-button">
+                      <Button
+                        onClick={() => setShowTipModal(true)}
+                        className="gradient-button"
+                      >
                         <DollarSign className="h-4 w-4 mr-2" />
                         Tip Artist
                       </Button>
@@ -262,8 +301,12 @@ export default function ProfileContent({ walletAddress }: ProfileContentProps) {
         <Tabs defaultValue="artworks" className="space-y-6">
           <TabsList className="grid w-full grid-cols-2 lg:grid-cols-4">
             <TabsTrigger value="artworks">My Artwork</TabsTrigger>
-            {profileData.isArtist && <TabsTrigger value="exclusive">Exclusive Content</TabsTrigger>}
-            {!profileData.isArtist && <TabsTrigger value="subscriptions">Subscriptions</TabsTrigger>}
+            {profileData.isArtist && (
+              <TabsTrigger value="exclusive">Exclusive Content</TabsTrigger>
+            )}
+            {!profileData.isArtist && (
+              <TabsTrigger value="subscriptions">Subscriptions</TabsTrigger>
+            )}
             <TabsTrigger value="activity">Activity</TabsTrigger>
           </TabsList>
 
@@ -292,7 +335,9 @@ export default function ProfileContent({ walletAddress }: ProfileContentProps) {
                 <Palette className="h-12 w-12 mx-auto mb-4 text-muted-foreground" />
                 <h3 className="text-lg font-semibold mb-2">No artwork yet</h3>
                 <p className="text-muted-foreground">
-                  {isOwnProfile ? "Start creating your first NFT!" : "This artist hasn't published any artwork yet."}
+                  {isOwnProfile
+                    ? "Start creating your first NFT!"
+                    : "This artist hasn't published any artwork yet."}
                 </p>
               </div>
             )}
@@ -304,7 +349,8 @@ export default function ProfileContent({ walletAddress }: ProfileContentProps) {
               <div className="flex items-center justify-between">
                 <h2 className="text-xl font-semibold">Exclusive Content</h2>
                 <span className="text-sm text-muted-foreground">
-                  {exclusiveArtworks.length} exclusive artwork{exclusiveArtworks.length !== 1 ? "s" : ""}
+                  {exclusiveArtworks.length} exclusive artwork
+                  {exclusiveArtworks.length !== 1 ? "s" : ""}
                 </span>
               </div>
 
@@ -325,11 +371,17 @@ export default function ProfileContent({ walletAddress }: ProfileContentProps) {
                       </div>
                     </div>
                     <div className="space-y-4">
-                      <h3 className="text-lg font-semibold">Exclusive Content</h3>
+                      <h3 className="text-lg font-semibold">
+                        Exclusive Content
+                      </h3>
                       <p className="text-muted-foreground">
-                        Subscribe to {profileData.username} to access their exclusive artwork and content.
+                        Subscribe to {profileData.username} to access their
+                        exclusive artwork and content.
                       </p>
-                      <Button onClick={() => setShowSubscriptionModal(true)} className="gradient-button">
+                      <Button
+                        onClick={() => setShowSubscriptionModal(true)}
+                        className="gradient-button"
+                      >
                         <Users className="h-4 w-4 mr-2" />
                         Subscribe to View
                       </Button>
@@ -350,7 +402,9 @@ export default function ProfileContent({ walletAddress }: ProfileContentProps) {
               ) : (
                 <div className="text-center py-12">
                   <Star className="h-12 w-12 mx-auto mb-4 text-muted-foreground" />
-                  <h3 className="text-lg font-semibold mb-2">No exclusive content yet</h3>
+                  <h3 className="text-lg font-semibold mb-2">
+                    No exclusive content yet
+                  </h3>
                   <p className="text-muted-foreground">
                     {isOwnProfile
                       ? "Create exclusive content for your subscribers!"
@@ -367,8 +421,12 @@ export default function ProfileContent({ walletAddress }: ProfileContentProps) {
               <h2 className="text-xl font-semibold">My Subscriptions</h2>
               <div className="text-center py-12">
                 <Users className="h-12 w-12 mx-auto mb-4 text-muted-foreground" />
-                <h3 className="text-lg font-semibold mb-2">No subscriptions yet</h3>
-                <p className="text-muted-foreground">Subscribe to artists to access their exclusive content.</p>
+                <h3 className="text-lg font-semibold mb-2">
+                  No subscriptions yet
+                </h3>
+                <p className="text-muted-foreground">
+                  Subscribe to artists to access their exclusive content.
+                </p>
               </div>
             </TabsContent>
           )}
@@ -381,7 +439,9 @@ export default function ProfileContent({ walletAddress }: ProfileContentProps) {
                 <Coins className="h-6 w-6 text-muted-foreground" />
               </div>
               <h3 className="text-lg font-semibold mb-2">No recent activity</h3>
-              <p className="text-muted-foreground">Activity will appear here as you interact with the platform.</p>
+              <p className="text-muted-foreground">
+                Activity will appear here as you interact with the platform.
+              </p>
             </div>
           </TabsContent>
         </Tabs>
@@ -416,10 +476,10 @@ export default function ProfileContent({ walletAddress }: ProfileContentProps) {
         onClose={() => setShowEditModal(false)}
         currentProfile={profileData}
         onProfileUpdate={(updatedProfile) => {
-          setProfileData(updatedProfile)
-          setShowEditModal(false)
+          setProfileData(updatedProfile);
+          setShowEditModal(false);
         }}
       />
     </>
-  )
+  );
 }

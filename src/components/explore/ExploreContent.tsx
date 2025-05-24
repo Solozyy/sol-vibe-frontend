@@ -1,23 +1,31 @@
-"use client"
+"use client";
 
-import { useState, useEffect } from "react"
-import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
-import { ArtworkCard } from "@/components/artwork/ArtworkCard"
-import { ArtworkModal } from "@/components/artwork/ArtworkModal"
-import { useUser } from "@/contexts/UserContext"
-import { Search, Filter, TrendingUp, Clock } from "lucide-react"
-import type { Artwork } from "@/types"
+import { useState, useEffect } from "react";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { ArtworkCard } from "@/components/artwork/ArtworkCard";
+import { ArtworkModal } from "@/components/artwork/ArtworkModal";
+import { useUser } from "@/contexts/UserContext";
+import { Search, Filter, TrendingUp, Clock } from "lucide-react";
+import type { Artwork } from "@/types";
 
 // Mock artwork data
 const mockArtworks: Artwork[] = [
   {
     id: "1",
     title: "Digital Dreams",
-    description: "A vibrant exploration of digital consciousness and virtual reality landscapes.",
-    imageUrl: "/placeholder.svg?height=400&width=400&query=digital art painting",
-    artistWallet: "9WzDXwBbmkg8ZTbNMqUxvQRAyrZzDsGYdLVL9zYtAWWM",
+    description:
+      "A vibrant exploration of digital consciousness and virtual reality landscapes.",
+    imageUrl:
+      "/placeholder.svg?height=400&width=400&query=digital art painting",
+    artistWallet: "2Qap48j9Wb4cnDZ7TUFNGxoaMuE6LPi14QTS8MHe5moW",
     artistUsername: "CryptoArtist",
     artistAvatar: "/placeholder.svg?height=50&width=50&query=artist avatar",
     isExclusive: false,
@@ -32,9 +40,10 @@ const mockArtworks: Artwork[] = [
   {
     id: "2",
     title: "Neon Nights",
-    description: "Cyberpunk-inspired artwork featuring neon lights and futuristic cityscapes.",
+    description:
+      "Cyberpunk-inspired artwork featuring neon lights and futuristic cityscapes.",
     imageUrl: "/placeholder.svg?height=400&width=400&query=neon cyberpunk art",
-    artistWallet: "8VzCXwBbmkg8ZTbNMqUxvQRAyrZzDsGYdLVL9zYtBWWN",
+    artistWallet: "2Qap48j9Wb4cnDZ7TUFNGxoaMuE6LPi14QTS8MHe5moW",
     artistUsername: "NeonMaster",
     artistAvatar: "/placeholder.svg?height=50&width=50&query=neon artist",
     isExclusive: false,
@@ -48,9 +57,11 @@ const mockArtworks: Artwork[] = [
   {
     id: "3",
     title: "Abstract Emotions",
-    description: "An emotional journey through abstract forms and vibrant colors.",
-    imageUrl: "/placeholder.svg?height=400&width=400&query=abstract emotional art",
-    artistWallet: "7UzBXwBbmkg8ZTbNMqUxvQRAyrZzDsGYdLVL9zYtCWWO",
+    description:
+      "An emotional journey through abstract forms and vibrant colors.",
+    imageUrl:
+      "/placeholder.svg?height=400&width=400&query=abstract emotional art",
+    artistWallet: "2Qap48j9Wb4cnDZ7TUFNGxoaMuE6LPi14QTS8MHe5moW",
     artistUsername: "AbstractVibe",
     artistAvatar: "/placeholder.svg?height=50&width=50&query=abstract artist",
     isExclusive: false,
@@ -64,9 +75,11 @@ const mockArtworks: Artwork[] = [
   {
     id: "4",
     title: "Ocean Depths",
-    description: "Deep sea exploration through digital art, featuring marine life and underwater scenes.",
-    imageUrl: "/placeholder.svg?height=400&width=400&query=ocean underwater art",
-    artistWallet: "6TzAXwBbmkg8ZTbNMqUxvQRAyrZzDsGYdLVL9zYtDWWP",
+    description:
+      "Deep sea exploration through digital art, featuring marine life and underwater scenes.",
+    imageUrl:
+      "/placeholder.svg?height=400&width=400&query=ocean underwater art",
+    artistWallet: "2Qap48j9Wb4cnDZ7TUFNGxoaMuE6LPi14QTS8MHe5moW",
     artistUsername: "OceanDreamer",
     artistAvatar: "/placeholder.svg?height=50&width=50&query=ocean artist",
     isExclusive: false,
@@ -77,27 +90,28 @@ const mockArtworks: Artwork[] = [
     createdAt: "2024-01-12T14:10:00Z",
     openseaUrl: "https://opensea.io/assets/solana/artwork4",
   },
-]
+];
 
 export default function ExploreContent() {
-  const [artworks, setArtworks] = useState<Artwork[]>(mockArtworks)
-  const [filteredArtworks, setFilteredArtworks] = useState<Artwork[]>(mockArtworks)
-  const [searchQuery, setSearchQuery] = useState("")
-  const [sortBy, setSortBy] = useState<"trending" | "new">("trending")
-  const [selectedArtwork, setSelectedArtwork] = useState<Artwork | null>(null)
-  const [loading, setLoading] = useState(false)
-  const { user } = useUser()
+  const [artworks, setArtworks] = useState<Artwork[]>(mockArtworks);
+  const [filteredArtworks, setFilteredArtworks] =
+    useState<Artwork[]>(mockArtworks);
+  const [searchQuery, setSearchQuery] = useState("");
+  const [sortBy, setSortBy] = useState<"trending" | "new">("trending");
+  const [selectedArtwork, setSelectedArtwork] = useState<Artwork | null>(null);
+  const [loading, setLoading] = useState(false);
+  const { user } = useUser();
 
   useEffect(() => {
-    fetchArtworks()
-  }, [sortBy])
+    fetchArtworks();
+  }, [sortBy]);
 
   useEffect(() => {
-    filterArtworks()
-  }, [searchQuery, artworks])
+    filterArtworks();
+  }, [searchQuery, artworks]);
 
   const fetchArtworks = async () => {
-    setLoading(true)
+    setLoading(true);
     try {
       // TODO: Replace with actual API call
       // const response = await apiClient.getArtworks({ sortBy })
@@ -106,36 +120,43 @@ export default function ExploreContent() {
       // Mock sorting
       const sorted = [...mockArtworks].sort((a, b) => {
         if (sortBy === "trending") {
-          return b.netVotes - a.netVotes
+          return b.netVotes - a.netVotes;
         } else {
-          return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
+          return (
+            new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
+          );
         }
-      })
-      setArtworks(sorted)
+      });
+      setArtworks(sorted);
     } catch (error) {
-      console.error("Failed to fetch artworks:", error)
+      console.error("Failed to fetch artworks:", error);
     } finally {
-      setLoading(false)
+      setLoading(false);
     }
-  }
+  };
 
   const filterArtworks = () => {
     if (!searchQuery.trim()) {
-      setFilteredArtworks(artworks)
-      return
+      setFilteredArtworks(artworks);
+      return;
     }
 
     const filtered = artworks.filter(
       (artwork) =>
         artwork.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        artwork.artistUsername.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        artwork.description.toLowerCase().includes(searchQuery.toLowerCase()),
-    )
-    setFilteredArtworks(filtered)
-  }
+        artwork.artistUsername
+          .toLowerCase()
+          .includes(searchQuery.toLowerCase()) ||
+        artwork.description.toLowerCase().includes(searchQuery.toLowerCase())
+    );
+    setFilteredArtworks(filtered);
+  };
 
-  const handleVote = async (artworkId: string, voteType: "upvote" | "downvote") => {
-    if (!user) return
+  const handleVote = async (
+    artworkId: string,
+    voteType: "upvote" | "downvote"
+  ) => {
+    if (!user) return;
 
     try {
       // TODO: Replace with actual API call
@@ -145,22 +166,26 @@ export default function ExploreContent() {
       setArtworks((prev) =>
         prev.map((artwork) => {
           if (artwork.id === artworkId) {
-            const newUpvotes = voteType === "upvote" ? artwork.upvotes + 1 : artwork.upvotes
-            const newDownvotes = voteType === "downvote" ? artwork.downvotes + 1 : artwork.downvotes
+            const newUpvotes =
+              voteType === "upvote" ? artwork.upvotes + 1 : artwork.upvotes;
+            const newDownvotes =
+              voteType === "downvote"
+                ? artwork.downvotes + 1
+                : artwork.downvotes;
             return {
               ...artwork,
               upvotes: newUpvotes,
               downvotes: newDownvotes,
               netVotes: newUpvotes - newDownvotes,
-            }
+            };
           }
-          return artwork
-        }),
-      )
+          return artwork;
+        })
+      );
     } catch (error) {
-      console.error("Failed to vote:", error)
+      console.error("Failed to vote:", error);
     }
-  }
+  };
 
   return (
     <div className="space-y-6">
@@ -168,7 +193,9 @@ export default function ExploreContent() {
       <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
         <div>
           <h1 className="text-3xl font-bold">Explore Artwork</h1>
-          <p className="text-muted-foreground">Discover amazing NFT artwork from talented artists</p>
+          <p className="text-muted-foreground">
+            Discover amazing NFT artwork from talented artists
+          </p>
         </div>
 
         <div className="flex items-center gap-2">
@@ -191,7 +218,10 @@ export default function ExploreContent() {
           />
         </div>
 
-        <Select value={sortBy} onValueChange={(value: "trending" | "new") => setSortBy(value)}>
+        <Select
+          value={sortBy}
+          onValueChange={(value: "trending" | "new") => setSortBy(value)}
+        >
           <SelectTrigger className="w-full md:w-48">
             <SelectValue />
           </SelectTrigger>
@@ -246,7 +276,9 @@ export default function ExploreContent() {
             <Search className="h-12 w-12 text-muted-foreground" />
           </div>
           <h3 className="text-lg font-semibold mb-2">No artwork found</h3>
-          <p className="text-muted-foreground">Try adjusting your search or filters</p>
+          <p className="text-muted-foreground">
+            Try adjusting your search or filters
+          </p>
         </div>
       )}
 
@@ -258,5 +290,5 @@ export default function ExploreContent() {
         onVote={handleVote}
       />
     </div>
-  )
+  );
 }

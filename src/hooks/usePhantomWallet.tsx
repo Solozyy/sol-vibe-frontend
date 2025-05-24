@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback } from "react";
-import { Connection, PublicKey } from "@solana/web3.js";
+import { Connection, PublicKey, Transaction } from "@solana/web3.js";
 import {
   authControllerCheckWallet,
   // authControllerRequestSignatureMessage, // Potentially needed for login flow
@@ -21,6 +21,9 @@ export interface PhantomWindow extends Window {
       message: Uint8Array,
       encoding: string
     ) => Promise<{ signature: Uint8Array; publicKey: PublicKey }>;
+    signAndSendTransaction: (
+      transaction: Transaction
+    ) => Promise<{ signature: string }>;
   };
 }
 
@@ -60,7 +63,10 @@ export const usePhantomWallet = () => {
   // Function to check if user profile exists in backend
   const checkUserProfileExists = useCallback(
     async (walletAddress: string): Promise<boolean> => {
-      console.log("Checking if profile exists for wallet via API:", walletAddress);
+      console.log(
+        "Checking if profile exists for wallet via API:",
+        walletAddress
+      );
       try {
         const payload: CheckWalletDto = { walletAddress };
         const response = await authControllerCheckWallet(payload);
@@ -323,13 +329,23 @@ export const usePhantomWallet = () => {
     // For now, just closing the modal and updating local state.
   }, []);
 
-  const customSignMessage = useCallback(async (message: Uint8Array, encoding: string = 'utf8'): Promise<{ signature: Uint8Array; publicKey: PublicKey | null }> => {
-    if (window.solana && window.solana.signMessage && window.solana.publicKey) {
-      return window.solana.signMessage(message, encoding);
-    }
-    // Hoặc throw error nếu không thể ký
-    throw new Error("Wallet not connected or signMessage not available.");
-  }, []); // Dependencies: publicKey nếu nó thay đổi và cần thiết cho signMessage (thường là có)
+  const customSignMessage = useCallback(
+    async (
+      message: Uint8Array,
+      encoding: string = "utf8"
+    ): Promise<{ signature: Uint8Array; publicKey: PublicKey | null }> => {
+      if (
+        window.solana &&
+        window.solana.signMessage &&
+        window.solana.publicKey
+      ) {
+        return window.solana.signMessage(message, encoding);
+      }
+      // Hoặc throw error nếu không thể ký
+      throw new Error("Wallet not connected or signMessage not available.");
+    },
+    []
+  ); // Dependencies: publicKey nếu nó thay đổi và cần thiết cho signMessage (thường là có)
 
   return {
     ...walletInfo,

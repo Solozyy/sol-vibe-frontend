@@ -1,34 +1,54 @@
-"use client"
+"use client";
 
-import { useState } from "react"
-import Image from "next/image"
-import Link from "next/link"
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog"
-import { Button } from "@/components/ui/button"
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
-import { Badge } from "@/components/ui/badge"
-import { Separator } from "@/components/ui/separator"
-import { TipModal } from "@/components/tipping/TipModal"
-import { useUser } from "@/contexts/UserContext"
-import { useToast } from "@/hooks/use-toast"
-import { ExternalLink, ChevronUp, ChevronDown, Lock, Calendar, DollarSign, Share2 } from "lucide-react"
-import type { Artwork } from "@/types"
+import { useState } from "react";
+import Image from "next/image";
+import Link from "next/link";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
+import { Button } from "@/components/ui/button";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Badge } from "@/components/ui/badge";
+import { Separator } from "@/components/ui/separator";
+import { TipModal } from "@/components/tipping/TipModal";
+import { useUser } from "@/contexts/UserContext";
+import { useToast } from "@/hooks/use-toast";
+import {
+  ExternalLink,
+  ChevronUp,
+  ChevronDown,
+  Lock,
+  Calendar,
+  DollarSign,
+  Share2,
+} from "lucide-react";
+import type { Artwork } from "@/types";
+import { usePhantomWalletContext } from "@/providers/PhantomWalletProvider";
 
 interface ArtworkModalProps {
-  artwork: Artwork | null
-  isOpen: boolean
-  onClose: () => void
-  onVote: (artworkId: string, voteType: "upvote" | "downvote") => void
+  artwork: Artwork | null;
+  isOpen: boolean;
+  onClose: () => void;
+  onVote: (artworkId: string, voteType: "upvote" | "downvote") => void;
 }
 
-export function ArtworkModal({ artwork, isOpen, onClose, onVote }: ArtworkModalProps) {
-  const [showTipModal, setShowTipModal] = useState(false)
-  const [isVoting, setIsVoting] = useState(false)
-  const [userVote, setUserVote] = useState<"upvote" | "downvote" | null>(null)
-  const { user } = useUser()
-  const { toast } = useToast()
+export function ArtworkModal({
+  artwork,
+  isOpen,
+  onClose,
+  onVote,
+}: ArtworkModalProps) {
+  const [showTipModal, setShowTipModal] = useState(false);
+  const [isVoting, setIsVoting] = useState(false);
+  const [userVote, setUserVote] = useState<"upvote" | "downvote" | null>(null);
+  const { user } = useUser();
+  const { connected, connect } = usePhantomWalletContext();
+  const { toast } = useToast();
 
-  if (!artwork) return null
+  if (!artwork) return null;
 
   const handleVote = async (voteType: "upvote" | "downvote") => {
     if (!user) {
@@ -36,8 +56,8 @@ export function ArtworkModal({ artwork, isOpen, onClose, onVote }: ArtworkModalP
         title: "Authentication Required",
         description: "Please connect your wallet to vote.",
         variant: "destructive",
-      })
-      return
+      });
+      return;
     }
 
     if (userVote === voteType) {
@@ -45,28 +65,28 @@ export function ArtworkModal({ artwork, isOpen, onClose, onVote }: ArtworkModalP
         title: "Already Voted",
         description: "You have already voted on this artwork.",
         variant: "destructive",
-      })
-      return
+      });
+      return;
     }
 
-    setIsVoting(true)
+    setIsVoting(true);
     try {
-      await onVote(artwork.id, voteType)
-      setUserVote(voteType)
+      await onVote(artwork.id, voteType);
+      setUserVote(voteType);
       toast({
         title: "Vote Recorded",
         description: `You ${voteType}d this artwork!`,
-      })
+      });
     } catch (error) {
       toast({
         title: "Vote Failed",
         description: "Failed to record your vote. Please try again.",
         variant: "destructive",
-      })
+      });
     } finally {
-      setIsVoting(false)
+      setIsVoting(false);
     }
-  }
+  };
 
   const handleShare = async () => {
     try {
@@ -74,24 +94,24 @@ export function ArtworkModal({ artwork, isOpen, onClose, onVote }: ArtworkModalP
         title: artwork.title,
         text: `Check out "${artwork.title}" by ${artwork.artistUsername} on SolVibe`,
         url: window.location.href,
-      })
+      });
     } catch (error) {
       // Fallback to clipboard
-      navigator.clipboard.writeText(window.location.href)
+      navigator.clipboard.writeText(window.location.href);
       toast({
         title: "Link Copied",
         description: "Artwork link copied to clipboard!",
-      })
+      });
     }
-  }
+  };
 
   const formatDate = (dateString: string) => {
     return new Date(dateString).toLocaleDateString("en-US", {
       year: "numeric",
       month: "long",
       day: "numeric",
-    })
-  }
+    });
+  };
 
   return (
     <>
@@ -104,11 +124,19 @@ export function ArtworkModal({ artwork, isOpen, onClose, onVote }: ArtworkModalP
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
             {/* Image */}
             <div className="relative aspect-square rounded-xl overflow-hidden">
-              <Image src={artwork.imageUrl || "/placeholder.svg"} alt={artwork.title} fill className="object-cover" />
+              <Image
+                src={artwork.imageUrl || "/placeholder.svg"}
+                alt={artwork.title}
+                fill
+                className="object-cover"
+              />
 
               {artwork.isExclusive && (
                 <div className="absolute top-4 right-4">
-                  <Badge variant="secondary" className="bg-purple-600 text-white">
+                  <Badge
+                    variant="secondary"
+                    className="bg-purple-600 text-white"
+                  >
                     <Lock className="h-3 w-3 mr-1" />
                     Exclusive
                   </Badge>
@@ -131,8 +159,13 @@ export function ArtworkModal({ artwork, isOpen, onClose, onVote }: ArtworkModalP
                   className="flex items-center space-x-3 hover:opacity-80 transition-opacity"
                 >
                   <Avatar className="h-10 w-10">
-                    <AvatarImage src={artwork.artistAvatar || "/placeholder.svg"} alt={artwork.artistUsername} />
-                    <AvatarFallback>{artwork.artistUsername.charAt(0)}</AvatarFallback>
+                    <AvatarImage
+                      src={artwork.artistAvatar || "/placeholder.svg"}
+                      alt={artwork.artistUsername}
+                    />
+                    <AvatarFallback>
+                      {artwork.artistUsername.charAt(0)}
+                    </AvatarFallback>
                   </Avatar>
                   <div>
                     <p className="font-medium">{artwork.artistUsername}</p>
@@ -141,12 +174,27 @@ export function ArtworkModal({ artwork, isOpen, onClose, onVote }: ArtworkModalP
                 </Link>
 
                 <Button
-                  onClick={() => setShowTipModal(true)}
+                  onClick={async () => {
+                    if (!window.solana) {
+                      window.open("https://phantom.app/", "_blank");
+                      return;
+                    }
+                    if (!connected) {
+                      await connect();
+                    }
+                    setShowTipModal(true);
+                  }}
                   className="gradient-button"
-                  disabled={!user || user.walletAddress === artwork.artistWallet}
+                  disabled={
+                    !user || user.walletAddress === artwork.artistWallet
+                  }
                 >
                   <DollarSign className="h-4 w-4 mr-2" />
-                  Tip Artist
+                  {!window.solana
+                    ? "Install Phantom"
+                    : !connected
+                    ? "Connect Wallet"
+                    : "Tip Artist"}
                 </Button>
               </div>
 
@@ -155,7 +203,9 @@ export function ArtworkModal({ artwork, isOpen, onClose, onVote }: ArtworkModalP
               {/* Stats */}
               <div className="grid grid-cols-2 gap-4">
                 <div className="text-center p-4 bg-muted/50 rounded-lg">
-                  <p className="text-2xl font-bold text-green-600">{artwork.upvotes}</p>
+                  <p className="text-2xl font-bold text-green-600">
+                    {artwork.upvotes}
+                  </p>
                   <p className="text-sm text-muted-foreground">Upvotes</p>
                 </div>
                 <div className="text-center p-4 bg-muted/50 rounded-lg">
@@ -170,7 +220,11 @@ export function ArtworkModal({ artwork, isOpen, onClose, onVote }: ArtworkModalP
                   variant="outline"
                   onClick={() => handleVote("upvote")}
                   disabled={isVoting || !user}
-                  className={`flex-1 ${userVote === "upvote" ? "border-green-600 text-green-600" : ""}`}
+                  className={`flex-1 ${
+                    userVote === "upvote"
+                      ? "border-green-600 text-green-600"
+                      : ""
+                  }`}
                 >
                   <ChevronUp className="h-4 w-4 mr-2" />
                   Upvote
@@ -180,7 +234,9 @@ export function ArtworkModal({ artwork, isOpen, onClose, onVote }: ArtworkModalP
                   variant="outline"
                   onClick={() => handleVote("downvote")}
                   disabled={isVoting || !user}
-                  className={`flex-1 ${userVote === "downvote" ? "border-red-600 text-red-600" : ""}`}
+                  className={`flex-1 ${
+                    userVote === "downvote" ? "border-red-600 text-red-600" : ""
+                  }`}
                 >
                   <ChevronDown className="h-4 w-4 mr-2" />
                   Downvote
@@ -208,7 +264,8 @@ export function ArtworkModal({ artwork, isOpen, onClose, onVote }: ArtworkModalP
                   <div className="flex items-center justify-between text-sm">
                     <span className="text-muted-foreground">Mint Address</span>
                     <span className="font-mono text-xs">
-                      {artwork.mintAddress.slice(0, 8)}...{artwork.mintAddress.slice(-8)}
+                      {artwork.mintAddress.slice(0, 8)}...
+                      {artwork.mintAddress.slice(-8)}
                     </span>
                   </div>
                 )}
@@ -216,14 +273,22 @@ export function ArtworkModal({ artwork, isOpen, onClose, onVote }: ArtworkModalP
 
               {/* Actions */}
               <div className="flex space-x-2">
-                <Button onClick={handleShare} variant="outline" className="flex-1">
+                <Button
+                  onClick={handleShare}
+                  variant="outline"
+                  className="flex-1"
+                >
                   <Share2 className="h-4 w-4 mr-2" />
                   Share
                 </Button>
 
                 {artwork.openseaUrl && (
                   <Button asChild variant="outline" className="flex-1">
-                    <a href={artwork.openseaUrl} target="_blank" rel="noopener noreferrer">
+                    <a
+                      href={artwork.openseaUrl}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                    >
                       <ExternalLink className="h-4 w-4 mr-2" />
                       OpenSea
                     </a>
@@ -243,5 +308,5 @@ export function ArtworkModal({ artwork, isOpen, onClose, onVote }: ArtworkModalP
         artworkId={artwork.id}
       />
     </>
-  )
+  );
 }
