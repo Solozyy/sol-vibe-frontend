@@ -1,5 +1,11 @@
 import { useState, useEffect, useCallback } from "react";
 import { Connection, PublicKey } from "@solana/web3.js";
+import {
+  authControllerCheckWallet,
+  // authControllerRequestSignatureMessage, // Potentially needed for login flow
+  // authControllerVerify, // Potentially needed for login flow
+} from "@/services/apiService"; // Import the new API service
+import type { CheckWalletDto } from "@/types/api"; // Import DTO
 
 export interface PhantomWindow extends Window {
   solana?: {
@@ -45,26 +51,39 @@ export const usePhantomWallet = () => {
   // Initialize profile status from localStorage
   const [profileCompleted, setProfileCompleted] = useState(() => {
     if (typeof window !== "undefined") {
-      return localStorage.getItem(PROFILE_SETUP_KEY) === "true";
+      // We will rely on API check rather than local storage for profile completion status initially
+      // return localStorage.getItem(PROFILE_SETUP_KEY) === "true";
     }
     return false;
   });
 
   // Function to check if user profile exists in backend
-  // This is a mock for now, will be replaced with actual API call later
-  const checkUserProfileExists = useCallback(async (walletAddress: string) => {
-    console.log("Checking if profile exists for wallet:", walletAddress);
-
-    // Mock API call - simulate a delay
-    await new Promise((resolve) => setTimeout(resolve, 500));
-
-    // For now, just check localStorage
-    // Later, this will be an API call to check if the user exists in the database
-    const exists = localStorage.getItem(PROFILE_SETUP_KEY) === "true";
-    console.log("Profile exists:", exists);
-
-    return exists;
-  }, []);
+  const checkUserProfileExists = useCallback(
+    async (walletAddress: string): Promise<boolean> => {
+      console.log("Checking if profile exists for wallet via API:", walletAddress);
+      try {
+        const payload: CheckWalletDto = { walletAddress };
+        const response = await authControllerCheckWallet(payload);
+        console.log("API checkUserProfileExists response:", response);
+        if (response.exists && response.user) {
+          // User exists, profile is considered completed
+          localStorage.setItem(PROFILE_SETUP_KEY, "true"); // Update local storage for consistency
+          setProfileCompleted(true);
+          return true;
+        }
+        // User does not exist or no user data returned
+        localStorage.removeItem(PROFILE_SETUP_KEY); // Clear local storage
+        setProfileCompleted(false);
+        return false;
+      } catch (error) {
+        console.error("Error checking profile from API:", error);
+        localStorage.removeItem(PROFILE_SETUP_KEY); // Clear on error as well
+        setProfileCompleted(false);
+        return false; // Assume profile does not exist or error occurred
+      }
+    },
+    []
+  );
 
   // Show profile setup modal if needed after wallet connection
   const showProfileSetupIfNeeded = useCallback(
@@ -177,37 +196,41 @@ export const usePhantomWallet = () => {
             address,
             connected: true,
           }));
-
-          // Update stored address
           localStorage.setItem(WALLET_ADDRESS_KEY, address);
+          // When account changes, re-check profile status
+          checkUserProfileExists(address).then((exists) => {
+            setWalletInfo((prev) => ({ ...prev, showProfileSetup: !exists }));
+          });
         } else {
           // Wallet disconnected or changed to a locked state
           setWalletInfo((prev) => ({
             ...prev,
             address: null,
             connected: false,
+            showProfileSetup: false, // Reset on disconnect
           }));
-
-          // Clear stored data
           localStorage.removeItem(WALLET_CONNECTION_KEY);
           localStorage.removeItem(WALLET_ADDRESS_KEY);
+          localStorage.removeItem(PROFILE_SETUP_KEY); // Clear profile status
+          setProfileCompleted(false); // Reset profile completed state
         }
       });
 
       // Listen for connection events
-      window.solana.on("connect", (publicKey: PublicKey) => {
+      window.solana.on("connect", async (publicKey: PublicKey) => {
         const address = publicKey.toString();
+        const profileExists = await checkUserProfileExists(address);
+
         setWalletInfo((prev) => ({
           ...prev,
           address,
           connected: true,
           connecting: false,
-          showProfileSetup: !profileCompleted,
+          showProfileSetup: !profileExists,
         }));
-
-        // Store connection info
         localStorage.setItem(WALLET_CONNECTION_KEY, "true");
         localStorage.setItem(WALLET_ADDRESS_KEY, address);
+        // setProfileCompleted is handled by checkUserProfileExists
       });
 
       window.solana.on("disconnect", () => {
@@ -218,10 +241,10 @@ export const usePhantomWallet = () => {
           connecting: false,
           showProfileSetup: false,
         }));
-
-        // Clear stored data
         localStorage.removeItem(WALLET_CONNECTION_KEY);
         localStorage.removeItem(WALLET_ADDRESS_KEY);
+        localStorage.removeItem(PROFILE_SETUP_KEY); // Clear profile status
+        setProfileCompleted(false); // Reset profile completed state
       });
     }
   }, [autoReconnect, profileCompleted]);
@@ -239,21 +262,20 @@ export const usePhantomWallet = () => {
       const { publicKey } = await window.solana.connect();
       const address = publicKey.toString();
 
+      // After connecting, check if the profile exists
+      const profileExists = await checkUserProfileExists(address);
+
       setWalletInfo({
         address,
         connected: true,
         connecting: false,
         walletExists: true,
-        // Don't show profile setup yet - we'll check if needed
-        showProfileSetup: false,
+        showProfileSetup: !profileExists, // Show setup if profile doesn't exist
       });
 
-      // Store connection info
       localStorage.setItem(WALLET_CONNECTION_KEY, "true");
       localStorage.setItem(WALLET_ADDRESS_KEY, address);
-
-      // Check if we need to show profile setup
-      await showProfileSetupIfNeeded(address);
+      // setProfileCompleted is handled by checkUserProfileExists
     } catch (error) {
       console.error("Failed to connect to Phantom wallet:", error);
       setWalletInfo((prev) => ({ ...prev, connecting: false }));
@@ -262,7 +284,7 @@ export const usePhantomWallet = () => {
       localStorage.removeItem(WALLET_CONNECTION_KEY);
       localStorage.removeItem(WALLET_ADDRESS_KEY);
     }
-  }, [showProfileSetupIfNeeded]);
+  }, [checkUserProfileExists]);
 
   // Disconnect from Phantom wallet
   const disconnect = useCallback(async () => {
@@ -296,12 +318,24 @@ export const usePhantomWallet = () => {
     setProfileCompleted(true);
     localStorage.setItem(PROFILE_SETUP_KEY, "true");
     setWalletInfo((prev) => ({ ...prev, showProfileSetup: false }));
+    // Potentially, after completing profile setup, we might want to re-verify auth
+    // or assume the registration process handled session/token.
+    // For now, just closing the modal and updating local state.
   }, []);
+
+  const customSignMessage = useCallback(async (message: Uint8Array, encoding: string = 'utf8'): Promise<{ signature: Uint8Array; publicKey: PublicKey | null }> => {
+    if (window.solana && window.solana.signMessage && window.solana.publicKey) {
+      return window.solana.signMessage(message, encoding);
+    }
+    // Hoặc throw error nếu không thể ký
+    throw new Error("Wallet not connected or signMessage not available.");
+  }, []); // Dependencies: publicKey nếu nó thay đổi và cần thiết cho signMessage (thường là có)
 
   return {
     ...walletInfo,
     connect,
     disconnect,
+    signMessage: customSignMessage, // Thêm signMessage vào đây
     closeProfileSetup,
     completeProfileSetup,
     profileCompleted,

@@ -9,6 +9,13 @@ import { X, Upload, User, FileText } from "lucide-react";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
 import type { PhantomWindow } from "@/hooks/usePhantomWallet";
+import {
+  authControllerRegister,
+  authControllerVerify,
+} from "@/services/apiService";
+import type { RegisterDto, VerifyDto } from "@/types/api";
+import bs58 from "bs58";
+import { useAuth } from "@/contexts/AuthContext";
 
 declare const window: PhantomWindow;
 
@@ -26,9 +33,12 @@ export function ProfileSetupModal({
   completeProfileSetup,
 }: ProfileSetupModalProps) {
   const router = useRouter();
+  const { login: authLogin } = useAuth();
   const [step, setStep] = useState(1); // 1: Form, 2: Signing, 3: Processing
   const [isLoading, setIsLoading] = useState(false);
   const [profileImage, setProfileImage] = useState<string | null>(null);
+  const [messageToSign, setMessageToSign] = useState<string | null>(null);
+  const [generatedSignature, setGeneratedSignature] = useState<string | null>(null);
   const [formData, setFormData] = useState({
     username: "",
     displayName: "",
@@ -63,67 +73,116 @@ export function ProfileSetupModal({
   };
 
   // Handle form submission
-  const handleFormSubmit = () => {
+  const handleFormSubmit = async () => {
+    if (!walletAddress) {
+      alert("Wallet address is not available. Please connect your wallet.");
+      return;
+    }
     // Validate required fields
     if (!formData.username || !formData.displayName) {
       alert("Username and display name are required");
       return;
     }
 
-    // Move to signing step
-    setStep(2);
-  };
+    setIsLoading(true);
+    setStep(2); // Optimistically move to signing prompt, or could be 2.5 (intermediate step before signing)
 
-  // Handle message signing
-  const handleSignMessage = async () => {
     try {
-      setIsLoading(true);
+      const registerPayload: RegisterDto = {
+        walletAddress,
+        username: formData.username,
+        name: formData.displayName, // Map displayName to name
+        bio: formData.bio,
+      };
+      console.log("Attempting to register with payload:", registerPayload);
+      const registerResponse = await authControllerRegister(registerPayload);
 
-      // Create the message to sign
-      const message = new TextEncoder().encode(
-        `Welcome to SolVibe!\n\nThis signature confirms your profile setup with username: ${formData.username}.\n\nWallet: ${walletAddress}`
-      );
-
-      // Request message signing from Phantom wallet
-      if (window.solana) {
-        try {
-          // Try using signMessage method
-          const signedMessage = await window.solana.signMessage(
-            message,
-            "utf8"
-          );
-
-          // Move to processing step
-          setStep(3);
-
-          // Here you would typically send this data to your backend
-          console.log("Profile data:", {
-            ...formData,
-            profileImage,
-            walletAddress,
-            signature: signedMessage,
-          });
-
-          // Mock API call - simulate saving to backend
-          await new Promise((resolve) => setTimeout(resolve, 1500));
-
-          // Mark profile setup as complete
-          completeProfileSetup();
-
-          // Redirect to home
-          router.push("/home");
-        } catch (signError) {
-          console.error("Error signing message:", signError);
-          alert("Failed to sign the message. Please try again.");
-          setStep(1); // Go back to form
-        }
+      if (registerResponse.message) {
+        setMessageToSign(registerResponse.message);
+        // Already moved to step 2 (Signing)
+        // UI should now prompt to sign the message `registerResponse.messageToSign`
+        console.log("Received message to sign:", registerResponse.message);
       } else {
-        throw new Error("Wallet not connected");
+        throw new Error("Failed to get message to sign from registration process.");
       }
     } catch (error) {
-      console.error("Error during profile setup:", error);
-      alert("Failed to complete profile setup. Please try again.");
+      console.error("Error during registration submission:", error);
+      alert(`Registration failed: ${error instanceof Error ? error.message : String(error)}`);
       setStep(1); // Go back to form
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  // Handle message signing and then verification
+  const handleSignAndVerify = async () => {
+    if (!walletAddress || !messageToSign) {
+      alert("Missing wallet address or message to sign. Please try again.");
+      setStep(1);
+      return;
+    }
+
+    setIsLoading(true);
+    // Step 3 is processing, which is appropriate here
+
+    try {
+      // 1. Create the message to sign (as Uint8Array for Phantom)
+      const messageBytes = new TextEncoder().encode(messageToSign);
+
+      // 2. Request message signing from Phantom wallet
+      if (window.solana && window.solana.signMessage) {
+        const signedMessage = await window.solana.signMessage(
+          messageBytes,
+          "utf8"
+        );
+        // The signature is Uint8Array, convert to base58 string for the backend.
+        const signatureString = bs58.encode(signedMessage.signature);
+        setGeneratedSignature(signatureString); // Save for potential display or retry
+
+        console.log("Message signed. Signature (Base58):", signatureString);
+        setStep(3); // Move to processing step before API call
+
+        // 3. Verify the signature with the backend
+        const verifyPayload: VerifyDto = {
+          walletAddress,
+          message: messageToSign, // The original message that was signed
+          signature: signatureString, // The generated signature string
+        };
+        console.log("Attempting to verify with payload:", verifyPayload);
+        const verifyResponse = await authControllerVerify(verifyPayload);
+
+        console.log("Verification successful:", verifyResponse);
+        // Store JWT token (verifyResponse.accessToken) securely (e.g., HttpOnly cookie or secure local storage)
+        // For this example, we'll assume it's handled or log it.
+        // console.log("Access Token:", verifyResponse.accessToken);
+
+        // Gọi hàm login từ AuthContext
+        if (verifyResponse.user && verifyResponse.accessToken) {
+          authLogin(verifyResponse.user, verifyResponse.accessToken);
+        } else {
+          // Xử lý trường hợp không có user hoặc token dù API thành công (ít xảy ra nếu API đúng)
+          throw new Error("Verification response missing user or token.");
+        }
+
+        // completeProfileSetup(); // Hàm này từ usePhantomWallet, có thể AuthProvider đã xử lý trạng thái tương tự
+                                // Nếu completeProfileSetup chỉ để đóng modal và cập nhật state local của usePhantomWallet,
+                                // thì vẫn có thể giữ lại hoặc thay bằng logic trực tiếp.
+                                // Hiện tại, chúng ta ưu tiên AuthContext quản lý trạng thái xác thực.
+        // Xem xét lại vai trò của completeProfileSetup từ props
+        // Nếu ProfileSetupModal chỉ chịu trách nhiệm đăng ký và AuthContext.login cập nhật trạng thái toàn cục,
+        // thì completeProfileSetup có thể chỉ gọi props.onClose() hoặc một hành động UI cụ thể.
+        // Để đơn giản, giả sử AuthContext.login là đủ để cập nhật trạng thái, ta sẽ đóng modal.
+        // Gọi onClose được truyền từ props để đóng modal
+        onClose(); // Giả sử onClose là hàm đóng modal được truyền từ parent
+
+        router.push("/home"); // Redirect to home or dashboard
+      } else {
+        throw new Error("Phantom wallet not available or signMessage method missing.");
+      }
+    } catch (error) {
+      console.error("Error during signing or verification:", error);
+      alert(`Operation failed: ${error instanceof Error ? error.message : String(error)}`);
+      setStep(1); // Go back to form on critical error
     } finally {
       setIsLoading(false);
     }
@@ -246,11 +305,11 @@ export function ProfileSetupModal({
               Please Sign Message
             </h3>
             <p className="text-gray-600 mb-6 max-w-xs mx-auto">
-              We need your signature to confirm your profile setup. Please check
-              your wallet for a signature request.
+              Confirm your profile creation by signing the message requested by your wallet.
+              The message is: "<strong>{messageToSign || 'Loading message...'}</strong>"
             </p>
             <Button
-              onClick={handleSignMessage}
+              onClick={handleSignAndVerify}
               className="bg-gradient-to-r from-[#9C43FF] to-[#0FFF9A] text-black font-medium hover:opacity-90 transition-opacity px-8 py-2.5 rounded-lg"
               disabled={isLoading}
             >
@@ -313,7 +372,7 @@ export function ProfileSetupModal({
       case 2: // Signing
         return (
           <p className="text-sm text-center text-gray-500">
-            Click the button above to proceed with signing
+            {isLoading ? "Processing registration..." : messageToSign ? "Ready to sign the message above." : "Requesting message..."}
           </p>
         );
 
