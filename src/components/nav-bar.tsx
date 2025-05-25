@@ -14,6 +14,8 @@ import {
   Copy,
   LogOut,
   ChevronDown,
+  Globe,
+  Heart,
 } from "lucide-react";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
@@ -106,8 +108,8 @@ export function NavBar({
   // Define navigation items based on wallet connection status
   const navItems = walletConnected
     ? [
-        { id: "explore", label: "Explore", icon: <Layers size={16} /> },
-        { id: "exclusive", label: "Exclusive", icon: <Shield size={16} /> },
+        { id: "explore", label: "Explore", icon: <Globe size={16} /> },
+        { id: "exclusive", label: "Exclusive", icon: <Heart size={16} /> },
         { id: "profile", label: "Profile", icon: <Users size={16} /> },
       ]
     : [
