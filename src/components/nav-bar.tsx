@@ -157,7 +157,7 @@ export function NavBar({
           disabled={isConnecting}
         >
           {/* Animated background */}
-          <span className="absolute inset-0 w-full h-full bg-gradient-to-r from-[#9C43FF] to-[#0FFF9A] group-hover:bg-gradient-to-r group-hover:from-[#0FFF9A] group-hover:to-[#9C43FF] transition-all duration-500 ease-in-out"></span>
+          <span className="absolute inset-0 w-full h-full bg-gradient-to-r from-[#9C43FF] to-[#0FFF9A] group-hover:bg-gradient-to-r transition-all duration-500 ease-in-out"></span>
 
           {/* Animated glow effect */}
           <span className="absolute inset-0 w-full h-full bg-gradient-to-r from-[#9C43FF]/50 to-[#0FFF9A]/50 blur-md group-hover:opacity-75 opacity-0 transition-all duration-500 ease-in-out"></span>
@@ -199,7 +199,7 @@ export function NavBar({
             size="lg"
           >
             {/* Animated background */}
-            <span className="absolute inset-0 w-full h-full bg-gradient-to-r from-[#9C43FF] to-[#0FFF9A] group-hover:bg-gradient-to-r group-hover:from-[#0FFF9A] group-hover:to-[#9C43FF] transition-all duration-500 ease-in-out"></span>
+            <span className="absolute inset-0 w-full h-full bg-gradient-to-r from-[#9C43FF] to-[#0FFF9A] group-hover:bg-gradient-to-r transition-all duration-500 ease-in-out"></span>
 
             {/* Button content */}
             <span className="relative flex items-center gap-2 z-10">
